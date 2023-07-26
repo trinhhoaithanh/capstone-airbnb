@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
-  
+
 
   prisma = new PrismaClient();
 
@@ -39,7 +39,11 @@ export class AuthService {
           data:newUser
         })
 
-        return "Sign up successfully"
+        return {
+          statusCode:200,
+          content:newUser,
+          dateTime: new Date().toISOString()
+        }
       }
 
     }
