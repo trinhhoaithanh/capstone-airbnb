@@ -10,41 +10,39 @@ export class AuthService {
   prisma = new PrismaClient();
 
   // sign up 
-  async signUp(userSignup){
-    try{
-      let { email, pass_word, name, birth_day, gender, role, phone} = userSignup;
+  async signUp(userSignup) {
+    try {
+      let { email, pass_word, name, birth_day, gender, role, phone } = userSignup;
 
       // check email if exists
       let checkEmail = await this.prisma.users.findFirst({
-        where:{
+        where: {
           email
         }
       })
 
-      if(checkEmail){
+      if (checkEmail) {
         throw new HttpException('Email is already existed', 400);
-      }
-      else{
+      } else {
         let newUser = {
           email,
-          pass_word: bcrypt.hashSync(pass_word,10),
-          name, 
-          birth_day, 
-          gender, 
-          role, 
+          pass_word: bcrypt.hashSync(pass_word, 10),
+          name,
+          birth_day,
+          gender,
+          role,
           phone,
         }
+        console.log(newUser); 
 
-        console.log(newUser)
         await this.prisma.users.create({
-          data:newUser
+          data: newUser
         })
 
         return "Sign up successfully"
       }
-
     }
-    catch(err){
+    catch (err) {
       throw new HttpException(err.response, err.status);
     }
 
