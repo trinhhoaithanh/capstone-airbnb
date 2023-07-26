@@ -8,7 +8,7 @@ CREATE TABLE users(
 	pass_word VARCHAR(100),
 	full_name VARCHAR(250),
 	birth_day VARCHAR(250),
-	gender VARCHAR(150),
+	gender BOOLEAN,
 	user_role VARCHAR(150),
 	phone VARCHAR(250)
 );
