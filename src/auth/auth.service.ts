@@ -11,9 +11,10 @@ export class AuthService {
 
   // sign up 
   async signUp(userSignup){
-    try{
-      let { email, pass_word, name, birth_day, gender, role, phone} = userSignup;
+    // try{
+      let { email, pass_word, full_name, birth_day, gender, user_role, phone} = userSignup;
 
+      console.log(userSignup)
       // check email if exists
       let checkEmail = await this.prisma.users.findFirst({
         where:{
@@ -28,10 +29,10 @@ export class AuthService {
         let newUser = {
           email,
           pass_word: bcrypt.hashSync(pass_word,10),
-          name, 
+          full_name, 
           birth_day, 
           gender, 
-          role, 
+          user_role, 
           phone,
         }
 
@@ -43,10 +44,10 @@ export class AuthService {
         return "Sign up successfully"
       }
 
-    }
-    catch(err){
-      throw new HttpException(err.response, err.status);
-    }
+    // }
+    // catch(err){
+    //   throw new HttpException(err.response, err.status);
+    // }
 
   }
 
