@@ -2,7 +2,7 @@ import { Injectable,HttpException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
   
@@ -11,10 +11,9 @@ export class AuthService {
 
   // sign up 
   async signUp(userSignup){
-    // try{
+    try{
       let { email, pass_word, full_name, birth_day, gender, user_role, phone} = userSignup;
 
-      console.log(userSignup)
       // check email if exists
       let checkEmail = await this.prisma.users.findFirst({
         where:{
@@ -36,7 +35,6 @@ export class AuthService {
           phone,
         }
 
-        console.log(newUser)
         await this.prisma.users.create({
           data:newUser
         })
@@ -44,10 +42,10 @@ export class AuthService {
         return "Sign up successfully"
       }
 
-    // }
-    // catch(err){
-    //   throw new HttpException(err.response, err.status);
-    // }
+    }
+    catch(err){
+      throw new HttpException(err.response, err.status);
+    }
 
   }
 

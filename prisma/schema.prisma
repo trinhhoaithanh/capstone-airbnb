@@ -71,7 +71,7 @@ model users {
   pass_word    String?        @db.VarChar(100)
   full_name    String?        @db.VarChar(250)
   birth_day    String?        @db.VarChar(250)
-  gender       String?        @db.VarChar(150)
+  gender       Boolean?
   user_role    String?        @db.VarChar(150)
   phone        String?        @db.VarChar(250)
   reservations reservations[]
