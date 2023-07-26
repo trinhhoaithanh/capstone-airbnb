@@ -9,7 +9,7 @@ CREATE TABLE users(
 	full_name VARCHAR(250),
 	birth_day VARCHAR(250),
 	gender VARCHAR(150),
-	role VARCHAR(150),
+	user_role VARCHAR(150),
 	phone VARCHAR(250)
 );
 
