@@ -6,7 +6,7 @@ CREATE TABLE users(
 	user_id INT PRIMARY KEY AUTO_INCREMENT,
 	email VARCHAR(250),
 	pass_word VARCHAR(100),
-	name VARCHAR(250),
+	full_name VARCHAR(250),
 	birth_day VARCHAR(250),
 	gender VARCHAR(150),
 	role VARCHAR(150),
@@ -56,8 +56,8 @@ CREATE TABLE reservations(
 
 CREATE TABLE reviews(
 	review_id INT PRIMARY KEY AUTO_INCREMENT,
-	reservation_id INT,
-	FOREIGN KEY (reservation_id) REFERENCES reservations(reservation_id),
+	room_id INT,
+	FOREIGN KEY (room_id) REFERENCES rooms(room_id),
 	user_id INT,
 	FOREIGN KEY (user_id) REFERENCES users(user_id),
 	review_date DATETIME,
