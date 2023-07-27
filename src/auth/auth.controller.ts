@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaClient } from '@prisma/client';
-import { ApiProperty } from '@nestjs/swagger/dist';
+import { ApiProperty, ApiTags } from '@nestjs/swagger/dist';
 class userType{
 
   
@@ -31,6 +31,8 @@ class userType{
 
 
 }
+
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
