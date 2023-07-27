@@ -4,33 +4,8 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaClient } from '@prisma/client';
 import { ApiProperty, ApiTags } from '@nestjs/swagger/dist';
-class userType{
+import { loginType, userType } from './dto/auth.dto';
 
-  
-  @ApiProperty()
-  email:String;
-
-  @ApiProperty()
-  pass_word:String;
-
-  @ApiProperty()
-  full_name:String;
-
-  @ApiProperty()
-  birth_day:String;
-
-  @ApiProperty()
-  gender:Boolean;
-
-  @ApiProperty()
-  user_role:String;
-
-  @ApiProperty()
-  phone:String;
-
-
-
-}
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -48,7 +23,7 @@ export class AuthController {
   
   // Login 
   @Post("/login")
-  login(@Body() body){
+  login(@Body() body:loginType){
     return this.authService.login(body);
   }
 
