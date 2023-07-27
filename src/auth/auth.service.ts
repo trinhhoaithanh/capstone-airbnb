@@ -58,7 +58,7 @@ export class AuthService {
 
   // login
   async login(userLogin) {
-    try {
+    // try {
       const { email, pass_word } = userLogin;
 
       let checkUser = await this.prisma.users.findFirst({
@@ -71,16 +71,15 @@ export class AuthService {
         if (bcrypt.compareSync(pass_word, checkUser.pass_word)) {
           checkUser = { ...checkUser, pass_word: '' };
 
-          let token = this.jwtService.signAsync(
+          let tokenGenerate = await this.jwtService.signAsync(
             { user_id: Number(checkUser.user_id) },
             { secret: this.configService.get('KEY'), expiresIn: '60m' },
           );
-
           return {
             statusCode: 200,
             content: {
               userLogin: checkUser,
-              token: token
+              token: tokenGenerate
             },
             dateTime: new Date().toISOString(),
           };
@@ -90,8 +89,8 @@ export class AuthService {
       } else {
         throw new HttpException('Email or password is incorrect!', 400);
       }
-    } catch (err) {
-      throw new HttpException(err.response, err.status);
-    }
+    // } catch (err) {
+    //   throw new HttpException(err.response, err.status);
+    // }
   }
 }
