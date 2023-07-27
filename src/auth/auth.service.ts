@@ -76,7 +76,14 @@ export class AuthService {
             { secret: this.configService.get('KEY'), expiresIn: '60m' },
           );
 
-          return token;
+          return {
+            statusCode: 200,
+            content: {
+              userLogin: checkUser,
+              token: token
+            },
+            dateTime: new Date().toISOString(),
+          };
         } else {
           throw new HttpException('Password is incorrect!', 400);
         }
