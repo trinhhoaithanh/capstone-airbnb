@@ -28,4 +28,44 @@ export class UsersService {
       throw new HttpException(err.response, err.status);
     }
   }
+
+  // Delete user
+  async deleteUserById(userId:number){
+    try{
+      let checkUser = await this.prisma.users.findFirst({
+        where:{
+          user_id:userId
+        }
+      })
+      
+  
+      if(checkUser){
+        await this.prisma.users.delete({
+          where:{
+            user_id:userId
+          }
+        })
+        return {
+          statusCode:200,
+          message:"Delete user successfully!",
+          content:null,
+          dateTime: new Date().toISOString()
+        }
+      }
+      else{
+        return {
+          statusCode:404,
+          message:"User not found",
+          content:null,
+          dateTime: new Date().toISOString()
+        }
+      }
+      
+    }
+    
+    catch(err){
+      throw new HttpException(err.response, err.status)
+    }
+  }
+    
 }
