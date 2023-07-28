@@ -16,10 +16,15 @@ export class UsersController {
   }
 
   // Delete user by id
- 
   @Delete("delete-user-by-id")
-  deleteUserById( @Query("id") userId:Number){
+  deleteUserById(@Query("id") userId:Number){
     return this.usersService.deleteUserById(Number(userId))
+  }
+
+  // Get user by user_id
+  @Get("get-user-by-id/:user_id")
+  getUserById(@Query("id") userId: number) {
+    return this.usersService.getUserById(+userId); 
   }
   
 }
