@@ -1,3 +1,4 @@
+import { check } from 'prettier';
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,22 +13,16 @@ export class UsersService {
   constructor(private jwtService: JwtService) {}
 
   // Get users 
-  async getUsers(tokenUser) {
+  async getUsers() {
     try {
-      let decodedToken = await this.jwtService.decode(tokenUser)
-      let id = decodedToken['user_id']
+      let getUsers = await this.prisma.users.findMany();
+      let data = getUsers.map(user => ({...user, pass_word: ""}))
       
-      let checkUser = await this.prisma.users.findMany();
-
-      if (checkUser) {
-        return {
-          statusCode: 200,
-          content: [checkUser],
-          dateTime: new Date().toISOString()
-        }
-      } else {
-        throw new HttpException('user not found!', 400);
-      }
+      return {
+        statusCode: 200,
+        content: data,
+        dateTime: new Date().toISOString()
+      } 
 
     } catch (err) {
       throw new HttpException(err.response, err.status);
