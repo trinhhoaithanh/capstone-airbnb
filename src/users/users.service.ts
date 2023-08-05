@@ -198,6 +198,31 @@ export class UsersService {
       throw new HttpException(err.response, err.status);
     }
   }
+
+  // Upload avatar
+  async uploadAvatar(token, file: Express.Multer.File) {
+    try {
+      const decodedToken = await this.jwtService.decode(token);
+      const userId = decodedToken['user_id'];
+
+      let userInfo = await this.prisma.users.update({
+        where: {
+          user_id: userId
+        },
+        data: {
+          avatar: file.filename
+        }
+      })
+
+      return {
+        statusCode: 200,
+        content: userInfo,
+        dateTime: new Date().toISOString()
+      }     
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
+    }
+  }
 }
    
 

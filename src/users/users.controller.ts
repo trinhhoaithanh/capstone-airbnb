@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query,Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query,Put, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {diskStorage} from 'multer'; 
+import { FileUploadDto } from './dto/fileUploadDto.dto';
 
 @ApiTags("Users")
 @Controller('users')
@@ -51,5 +54,27 @@ export class UsersController {
     return this.usersService.updateUser(token, userUpdate);
   }
 
+  // Upload user's avatar
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({type: FileUploadDto})
+  @UseInterceptors(FileInterceptor("file", {
+    storage: diskStorage({
+      destination: process.cwd() + "/public/img",
+      filename: (req, file, callback) => {
+        callback(null, new Date().getTime() + file.originalname)
+      }
+    })
+  }))
+  @ApiHeader({
+    name: 'token',
+    description: 'Your authentication token', 
+    required: true, 
+  })
+  @Post("upload-avatar")
+  uploadAvatar(
+    @UploadedFile() file: Express.Multer.File,
+    @Headers("token") token) {
+    return this.usersService.uploadAvatar(token, file); 
+  }
 
 }
