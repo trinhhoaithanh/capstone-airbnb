@@ -93,12 +93,12 @@ export class UsersService {
         }
       }
       else {
-        return {
+        throw new NotFoundException ({
           statusCode: 404,
           message: "User not found",
           content: null,
           dateTime: new Date().toISOString()
-        }
+        })
       }
     } catch (err) {
       throw new HttpException(err.response, err.status)

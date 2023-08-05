@@ -1,10 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Headers, Post, } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { Review } from './entities/review.entity';
 
+@ApiTags("Reviews")
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
+  // Create review
+  @ApiHeader({
+    name: "token",
+    description: "Your authentication token",
+    required: true
+  })
+  @Post("create-review")
+  createReview(
+    @Headers("token") token,
+    @Body() newReview: Review) {
+    return this.reviewsService.createReview(token, newReview); 
+  }
 }
