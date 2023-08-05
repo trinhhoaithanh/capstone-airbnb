@@ -10,7 +10,8 @@ CREATE TABLE users(
 	birth_day VARCHAR(250),
 	gender BOOLEAN,
 	user_role VARCHAR(150),
-	phone VARCHAR(250)
+	phone VARCHAR(250),
+	avatar VARCHAR(250)
 );
 
 CREATE TABLE rooms(

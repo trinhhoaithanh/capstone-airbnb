@@ -74,6 +74,7 @@ model users {
   gender       Boolean?
   user_role    String?        @db.VarChar(150)
   phone        String?        @db.VarChar(250)
+  avatar       String?        @db.VarChar(250)
   reservations reservations[]
   reviews      reviews[]
 }
