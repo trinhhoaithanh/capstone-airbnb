@@ -133,6 +133,36 @@ export class UsersService {
       throw new HttpException(err.response, err.status); 
     }
   }
+
+  // Get user by user_name
+  async getUserByName(userName: string) {
+    try {
+      let checkName = await this.prisma.users.findMany({
+        where: {
+          full_name: {
+            contains: userName
+          }
+        }
+      }); 
+
+      if (checkName.length > 0) {
+        return {
+          statusCode: 200,
+          content: checkName,
+          dateTime: new Date().toISOString()
+        }
+      } else {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: "Request is invalid",
+          content: "User not found!",
+          dateTime: new Date().toISOString()
+        }); 
+      }
+    } catch (err) {
+      throw new HttpException(err.response, err.status); 
+    }
+  }
 }
    
 

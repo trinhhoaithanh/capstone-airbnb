@@ -33,5 +33,10 @@ export class UsersController {
   getUserById(@Query("id") userId: number) {
     return this.usersService.getUserById(+userId); 
   }
-  
+
+  // Get user by user_name
+  @Get("get-user-by-name/:user_name")
+  getUserByName(@Query("full_name") userName: string) {
+    return this.usersService.getUserByName(userName); 
+  }
 }
