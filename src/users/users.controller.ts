@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Headers, Query,Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 
 @ApiTags("Users")
@@ -39,4 +39,17 @@ export class UsersController {
   getUserByName(@Query("full_name") userName: string) {
     return this.usersService.getUserByName(userName); 
   }
+
+  // Update user
+  @ApiHeader({
+    name: 'token',
+    description: 'Your authentication token', 
+    required: true, 
+  })
+  @Put("update-user")
+  updateUser(@Headers("token") token, @Body() userUpdate:UpdateUserDto){
+    return this.usersService.updateUser(token, userUpdate);
+  }
+
+
 }

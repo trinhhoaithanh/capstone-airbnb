@@ -163,6 +163,41 @@ export class UsersService {
       throw new HttpException(err.response, err.status); 
     }
   }
+
+  // Update user
+  async updateUser(token, userUpdate){
+    try{
+      const decodedToken = await this.jwtService.decode(token)
+      const userId = decodedToken['user_id']
+
+      const {full_name, email, birth_day, gender, user_role, phone} = userUpdate;
+
+      let newData = {
+        full_name,
+        email, 
+        birth_day, 
+        gender, 
+        user_role, 
+        phone
+      }
+
+      await this.prisma.users.update({
+        where:{
+          user_id:userId
+        },
+        data:newData
+      })
+
+      return {
+        statusCode: 200,
+        content: newData,
+        dateTime: new Date().toISOString()
+      }
+    }
+    catch(err){
+      throw new HttpException(err.response, err.status);
+    }
+  }
 }
    
 
