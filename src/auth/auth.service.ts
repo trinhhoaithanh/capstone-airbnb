@@ -58,7 +58,7 @@ export class AuthService {
 
   // login
   async login(userLogin) {
-    // try {
+    try {
       const { email, pass_word } = userLogin;
 
       let checkUser = await this.prisma.users.findFirst({
@@ -89,8 +89,8 @@ export class AuthService {
       } else {
         throw new HttpException('Email or password is incorrect!', 400);
       }
-    // } catch (err) {
-    //   throw new HttpException(err.response, err.status);
-    // }
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
+    }
   }
 }

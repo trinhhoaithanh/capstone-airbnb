@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
-
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UsersService {
@@ -24,6 +24,47 @@ export class UsersService {
         dateTime: new Date().toISOString()
       } 
 
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
+    }
+  }
+
+  // Create a user
+  async createUser(user) {
+    try {
+      let { email, pass_word, full_name, birth_day, gender, user_role, phone } =
+      user;
+
+      // check email if exists
+      let checkEmail = await this.prisma.users.findFirst({
+        where: {
+          email,
+        },
+      });
+
+      if (checkEmail) {
+        throw new HttpException('Email is already existed', 400);
+      } else {
+        let newUser = {
+          email,
+          pass_word: bcrypt.hashSync(pass_word, 10),
+          full_name,
+          birth_day,
+          gender,
+          user_role,
+          phone,
+        };
+
+        await this.prisma.users.create({
+          data: newUser,
+        });
+
+        return {
+          statusCode: 200,
+          content: newUser,
+          dateTime: new Date().toISOString(),
+        };
+      }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }

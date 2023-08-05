@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { User } from './entities/user.entity';
 
 @ApiTags("Users")
 @Controller('users')
@@ -13,6 +14,12 @@ export class UsersController {
   @Get("get-users")
   getUsers() {
     return this.usersService.getUsers(); 
+  }
+
+  // Create a user
+  @Post("create-user")
+  createUser(@Body() user:User){
+    return this.usersService.createUser(user);
   }
 
   // Delete user by id
