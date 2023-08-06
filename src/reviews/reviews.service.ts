@@ -56,4 +56,9 @@ export class ReviewsService {
       throw new HttpException(err.response, err.status);
     }
   }
+
+  // Get reviews by room_id
+  async getReviewByRoom() {
+    
+  }
 }
