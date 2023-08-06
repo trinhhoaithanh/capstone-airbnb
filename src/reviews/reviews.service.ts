@@ -16,7 +16,7 @@ export class ReviewsService {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken["user_id"]; 
 
-      const {room_id, user_id, review_date, content, rating} = newReview; 
+      const {room_id, content, rating} = newReview; 
 
       const newData = {
         room_id,

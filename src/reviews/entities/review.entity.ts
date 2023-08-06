@@ -4,8 +4,8 @@ export class Review {
     @ApiProperty()
     room_id: number;
 
-    @ApiProperty()
-    user_id: number;
+    // @ApiProperty()
+    // user_id: number;
 
     @ApiProperty()
     review_date: Date;
