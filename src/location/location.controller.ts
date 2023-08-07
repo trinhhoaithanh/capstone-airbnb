@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
@@ -9,6 +9,17 @@ import { ApiHeader, ApiTags } from '@nestjs/swagger';
 @Controller('location')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
+
+  // Get locations 
+  @ApiHeader({
+    name: "token",
+    description: "Your authentication token",
+    required: true
+  })
+  @Get("get-locations")
+  getLocations(@Headers("token") token) {
+    return this.locationService.getLocations(token); 
+  }
 
   // Create location
   @ApiHeader({

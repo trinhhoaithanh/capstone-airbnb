@@ -13,9 +13,7 @@ export class RoomsService {
 
     // Create room
     async createRoom(token, room) {
-        try {
-            // const decodedToken = await this.jwtService.decode(token);
-            // const userId = decodedToken["user_id"]; 
+        try { 
 
             const {room_name, client_number, bed_room, bed, bath_room, description, price, washing_machine, iron, tivi, air_conditioner, wifi, kitchen, parking, pool, location_id, image} = room;
             
