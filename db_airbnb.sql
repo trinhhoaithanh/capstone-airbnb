@@ -31,6 +31,8 @@ CREATE TABLE rooms(
 	kitchen BOOLEAN,
 	parking BOOLEAN,
 	pool BOOLEAN,
+	location_id INT,
+	FOREIGN KEY (location_id) REFERENCES location(location_id),
 	image VARCHAR(250)
 );
 

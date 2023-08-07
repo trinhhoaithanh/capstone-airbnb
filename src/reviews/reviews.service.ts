@@ -2,7 +2,6 @@ import { JwtService } from '@nestjs/jwt';
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { Review } from './entities/review.entity';
-import { check } from 'prettier';
 
 @Injectable()
 export class ReviewsService {
