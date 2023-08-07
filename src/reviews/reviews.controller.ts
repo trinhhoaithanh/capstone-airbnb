@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post, } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Query, } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Review } from './entities/review.entity';
@@ -23,7 +23,7 @@ export class ReviewsController {
 
   // Get reviews by room_id 
   @Get("get-review-by-room/:room_id")
-  getReviewByRoom() {
-    return this.reviewsService.getReviewByRoom(); 
+  getReviewByRoom(@Query("room_id") roomId: Number ) {
+    return this.reviewsService.getReviewByRoom(+roomId); 
   }
 }
