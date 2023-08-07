@@ -11,7 +11,7 @@ export class LocationService {
     constructor(private jwtService: JwtService) {}
 
     // Get locations 
-    async getLocations(token) {
+    async getLocations() {
         try {
             return {
                 statusCode: 200,

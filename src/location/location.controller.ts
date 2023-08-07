@@ -11,14 +11,9 @@ export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
   // Get locations 
-  @ApiHeader({
-    name: "token",
-    description: "Your authentication token",
-    required: true
-  })
   @Get("get-locations")
-  getLocations(@Headers("token") token) {
-    return this.locationService.getLocations(token); 
+  getLocations() {
+    return this.locationService.getLocations(); 
   }
 
   // Create location
