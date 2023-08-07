@@ -4,7 +4,7 @@ import { ReviewsController } from './reviews.controller';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports:[JwtModule.register({})],
+  imports: [JwtModule.register({})],
   controllers: [ReviewsController],
   providers: [ReviewsService]
 })
