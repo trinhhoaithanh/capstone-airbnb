@@ -14,6 +14,14 @@ CREATE TABLE users(
 	avatar VARCHAR(250)
 );
 
+CREATE TABLE location(
+	location_id INT PRIMARY KEY AUTO_INCREMENT,
+	location_name VARCHAR(250),
+	province VARCHAR(250),
+	nation VARCHAR(150),
+	location_image VARCHAR(150)
+);
+
 CREATE TABLE rooms(
 	room_id INT PRIMARY KEY AUTO_INCREMENT,
 	room_name VARCHAR(250),
@@ -36,13 +44,7 @@ CREATE TABLE rooms(
 	image VARCHAR(250)
 );
 
-CREATE TABLE location(
-	location_id INT PRIMARY KEY AUTO_INCREMENT,
-	location_name VARCHAR(250),
-	province VARCHAR(250),
-	nation VARCHAR(150),
-	location_image VARCHAR(150)
-);
+
 
 
 CREATE TABLE reservations(
