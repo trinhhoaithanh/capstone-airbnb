@@ -13,6 +13,7 @@ model location {
   province       String? @db.VarChar(250)
   nation         String? @db.VarChar(150)
   location_image String? @db.VarChar(150)
+  rooms          rooms[]
 }
 
 model reservations {
@@ -60,9 +61,13 @@ model rooms {
   kitchen         Boolean?
   parking         Boolean?
   pool            Boolean?
+  location_id     Int?
   image           String?        @db.VarChar(250)
   reservations    reservations[]
   reviews         reviews[]
+  location        location?      @relation(fields: [location_id], references: [location_id], onDelete: NoAction, onUpdate: NoAction, map: "rooms_ibfk_1")
+
+  @@index([location_id], map: "location_id")
 }
 
 model users {
