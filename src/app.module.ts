@@ -7,8 +7,9 @@ import { UsersModule } from './users/users.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { LocationModule } from './location/location.module';
+import { ReservationsModule } from './reservations/reservations.module';
 @Module({
-  imports: [AuthModule,ConfigModule.forRoot({isGlobal: true}), UsersModule, ReviewsModule, RoomsModule, LocationModule],
+  imports: [AuthModule,ConfigModule.forRoot({isGlobal: true}), UsersModule, ReviewsModule, RoomsModule, LocationModule, ReservationsModule],
   controllers: [AppController],
   providers: [AppService],
 })
