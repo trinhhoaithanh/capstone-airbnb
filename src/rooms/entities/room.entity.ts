@@ -47,5 +47,8 @@ export class Room {
     pool: boolean
 
     @ApiProperty()
+    location_id: number
+
+    @ApiProperty()
     image: string 
 }
