@@ -8,6 +8,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {diskStorage} from 'multer'; 
 import { FileUploadDto } from './dto/fileUploadDto.dto';
 
+@ApiTags("Users")
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
