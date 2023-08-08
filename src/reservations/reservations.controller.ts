@@ -36,14 +36,14 @@ export class ReservationsController {
   }
 
   // Get reservation by user id
-  @ApiHeader({
-    name: "token",
-    description: "Your authentication token",
-    required: true
-  })
-  @Get("get-reservation-by-user-id/:user_id")
-  getReservationByUserId(@Headers() token:string){
-    // return this.reservationsService.getReservationById(token)
-  }
+  // @ApiHeader({
+  //   name: "token",
+  //   description: "Your authentication token",
+  //   required: true
+  // })
+  // @Get("get-reservation-by-user-id/:user_id")
+  // getReservationByUserId(@Headers() token:string){
+  //   return this.reservationsService.getReservationById(token)
+  // }
 
 }
