@@ -1,4 +1,4 @@
-import { Controller} from '@nestjs/common';
+import { Controller, Get} from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -9,4 +9,9 @@ export class ReservationsController {
 
   // Book room 
   
+  // Get reservations 
+  @Get("get-reservations")
+  getReservation() {
+    return this.reservationsService.getReservation(); 
+  }
 }

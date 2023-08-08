@@ -10,6 +10,20 @@ export class LocationService {
     prisma = new PrismaClient();
     constructor(private jwtService: JwtService) {}
 
+    // Get locations 
+    async getLocations() {
+        try {
+            return {
+                statusCode: 200,
+                message: "Get locations successfully!",
+                content: await this.prisma.location.findMany(),
+                dateTime: new Date().toISOString()
+            }
+        } catch (err) {
+            throw new HttpException(err.response, err.status);
+        } 
+    }
+
     // Create location
     async createLocation(token, location) {
         try {

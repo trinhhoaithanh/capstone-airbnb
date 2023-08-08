@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
@@ -9,6 +9,12 @@ import { ApiHeader, ApiTags } from '@nestjs/swagger';
 @Controller('location')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
+
+  // Get locations 
+  @Get("get-locations")
+  getLocations() {
+    return this.locationService.getLocations(); 
+  }
 
   // Create location
   @ApiHeader({
