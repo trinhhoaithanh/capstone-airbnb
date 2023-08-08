@@ -1,4 +1,4 @@
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, HttpException, BadRequestException } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaClient } from '@prisma/client';
@@ -15,7 +15,7 @@ export class AuthService {
 
   prisma = new PrismaClient();
 
-  // sign up
+  // Sign up
   async signUp(userSignup) {
     try {
       let { email, pass_word, full_name, birth_day, gender, user_role, phone } =
@@ -47,6 +47,7 @@ export class AuthService {
 
         return {
           statusCode: 200,
+          message: "Sign up successfully!",
           content: newUser,
           dateTime: new Date().toISOString(),
         };
@@ -56,7 +57,7 @@ export class AuthService {
     }
   }
 
-  // login
+  // Login
   async login(userLogin) {
     try {
       const { email, pass_word } = userLogin;
@@ -77,6 +78,7 @@ export class AuthService {
           );
           return {
             statusCode: 200,
+            message: "Login successfully!",
             content: {
               userLogin: checkUser,
               token: tokenGenerate
@@ -84,10 +86,22 @@ export class AuthService {
             dateTime: new Date().toISOString(),
           };
         } else {
-          throw new HttpException('Password is incorrect!', 400);
+          // throw new HttpException('Password is incorrect!', 400);
+          throw new BadRequestException({
+            statusCode: 400,
+            message: "Request is invalid",
+            content: "Password is incorrect!",
+            dateTime: new Date().toISOString()
+          }); 
         }
       } else {
-        throw new HttpException('Email or password is incorrect!', 400);
+        // throw new HttpException('Email or password is incorrect!', 400);
+        throw new BadRequestException({
+          statusCode: 400,
+          message: "Request is invalid",
+          content: "Email or password is incorrect!",
+          dateTime: new Date().toISOString()
+        })
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
