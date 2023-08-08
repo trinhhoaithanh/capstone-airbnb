@@ -90,15 +90,16 @@ export class ReservationsService {
     }
   }
 
-  // Get reservation by id
-  async getReservationById(reservation_id) {
-    try {
+  // Get reservation by reservation_id
+  async getReservationById(reservationId) {
+    // try {
       let checkReservation = await this.prisma.reservations.findFirst({
         where: {
-          reservation_id,
+          reservation_id: reservationId,
         },
       });
-
+  
+      console.log(checkReservation);
       if (checkReservation) {
         return {
           statusCode: 200,
@@ -106,19 +107,19 @@ export class ReservationsService {
           content: checkReservation,
           dateTime: new Date().toISOString(),
         };
-      }
-      else{
+      } else {
         throw new NotFoundException({
-            statusCode: 404,
-            message: "Request is invalid",
-            content: "Reservation is not found",
-            dateTime: new Date().toISOString()
-          }); 
+          statusCode: 404,
+          message: 'Request is invalid',
+          content: 'Reservation is not found',
+          dateTime: new Date().toISOString(),
+        });
       }
-    } catch (err) {
-        throw new HttpException(err.response, err.status);
-    }
+    // } catch (err) {
+    //   throw new HttpException(err.response, err.status);
+    // }
   }
+  
 
   // Get reservation by user id
   async getReservationByUserId(token) {

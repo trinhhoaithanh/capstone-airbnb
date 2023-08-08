@@ -1,6 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class Reservation {
+    
+
     @ApiProperty()
     room_id: number;
 
@@ -12,4 +14,6 @@ export class Reservation {
 
     @ApiProperty()
     guest_amount:number
+    
+    
 }

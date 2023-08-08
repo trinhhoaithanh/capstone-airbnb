@@ -2,7 +2,7 @@ import { Body, Controller, Get, Headers, Param, Post} from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
-import { ApiBody, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Reservation } from './entities/reservation.entity';
 
 
@@ -30,9 +30,10 @@ export class ReservationsController {
   } 
 
   // Get reservation by id 
+  @ApiParam({ name: 'reservation_id', type: 'number' })
   @Get("get-reservation-by-id/:reservation_id")
-  getReservationById(@Param() reservation_id:number){
-    return this.reservationsService.getReservationById(reservation_id)
+  getReservationById(@Param() reservationId:number){
+    return this.reservationsService.getReservationById(Number(reservationId))
   }
 
   // Get reservation by user id
@@ -42,8 +43,8 @@ export class ReservationsController {
     required: true
   })
   @Get("get-reservation-by-user-id/:user_id")
-  getReservationByUserId(@Headers() token:string){
-    return this.reservationsService.getReservationById(token)
+  getReservationByUserId(@Headers("token") token){
+    return this.reservationsService.getReservationByUserId(token)
   }
 
 }
