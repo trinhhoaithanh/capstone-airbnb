@@ -4,6 +4,7 @@ import { UpdateRoomDto } from './dto/update-room.dto';
 import { User } from 'src/users/entities/user.entity';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { check } from 'prettier';
 
 @Injectable()
 export class RoomsService {
@@ -57,6 +58,35 @@ export class RoomsService {
                     statusCode: 404,
                     message: "Request is invalid",
                     content: "Location not found",
+                    dateTime: new Date().toISOString()
+                })
+            }
+        } catch (err) {
+            throw new HttpException(err.response, err.status); 
+        }
+    }
+
+    // Get room by room_id
+    async getRoomById(roomId) {
+        try {
+            let checkRoom = await this.prisma.rooms.findFirst({
+                where: {
+                    room_id: roomId
+                }
+            }); 
+
+            if (checkRoom) {
+                return {
+                    statusCode: 200,
+                    message: "Get room successfully!",
+                    content: checkRoom,
+                    dateTime: new Date().toISOString()
+                }
+            } else {
+                throw new NotFoundException({
+                    statusCode: 404,
+                    message: "Request is invalid",
+                    content: "Room not found",
                     dateTime: new Date().toISOString()
                 })
             }

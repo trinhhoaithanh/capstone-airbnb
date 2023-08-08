@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Query } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -28,5 +28,11 @@ export class RoomsController {
     @Body() room: Room
   ) {
     return this.roomsService.createRoom(token, room); 
+  }
+
+  // Get room by room_id
+  @Get("get-room-by-id/:room_id")
+  getRoomById(@Query("room_id") roomId: number) {
+    return this.roomsService.getRoomById(+roomId); 
   }
 }
