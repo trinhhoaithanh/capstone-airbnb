@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post} from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, Query} from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -29,10 +29,10 @@ export class ReservationsController {
     return this.reservationsService.createReservation(reservation,token)
   } 
 
-  // Get reservation by id 
+  // Get reservation by reservation_id 
   @Get("get-reservation-by-id/:reservation_id")
-  getReservationById(@Param() reservation_id:number){
-    return this.reservationsService.getReservationById(reservation_id)
+  getReservationById(@Query("reservation_id") reservationId: Number){
+    return this.reservationsService.getReservationById(+reservationId)
   }
 
   // Get reservation by user id
@@ -43,7 +43,7 @@ export class ReservationsController {
   })
   @Get("get-reservation-by-user-id/:user_id")
   getReservationByUserId(@Headers() token:string){
-    return this.reservationsService.getReservationById(token)
+    // return this.reservationsService.getReservationById(token)
   }
 
 }

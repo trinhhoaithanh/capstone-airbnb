@@ -90,12 +90,12 @@ export class ReservationsService {
     }
   }
 
-  // Get reservation by id
-  async getReservationById(reservation_id) {
+  // Get reservation by reservation_id
+  async getReservationById(reservationId: number) {
     try {
       let checkReservation = await this.prisma.reservations.findFirst({
         where: {
-          reservation_id,
+          reservation_id: reservationId,
         },
       });
 
@@ -111,7 +111,7 @@ export class ReservationsService {
         throw new NotFoundException({
             statusCode: 404,
             message: "Request is invalid",
-            content: "Reservation is not found",
+            content: "Reservation not found",
             dateTime: new Date().toISOString()
           }); 
       }
