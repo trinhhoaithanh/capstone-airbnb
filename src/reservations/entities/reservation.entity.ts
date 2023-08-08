@@ -12,7 +12,4 @@ export class Reservation {
 
     @ApiProperty()
     guest_amount:number
-
-    @ApiProperty()
-    user_id:number
 }

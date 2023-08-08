@@ -1,14 +1,15 @@
 import { PrismaClient } from '@prisma/client';
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class ReservationsService {
-  constructor(private jwtService: JwtService) {}
+  
 
   prisma = new PrismaClient();
+  constructor(private jwtService: JwtService) {}
 
   // Get reservations
   async getReservation() {
@@ -24,15 +25,15 @@ export class ReservationsService {
     }
   }
 
-  // create reservations
+  // Create reservation
   async createReservation(reservation, token) {
-    // try {
+    try {
       let decodedToken = await this.jwtService.decode(token);
       let userId = decodedToken['user_id'];
 
-      console.log(userId)
+      // console.log("userId", userId); 
 
-      let { room_id, start_date, end_date, guest_amount, user_id } = reservation;
+      let { room_id, start_date, end_date, guest_amount } = reservation;
 
       let findRoom = await this.prisma.rooms.findFirst({
         where:{
@@ -40,58 +41,56 @@ export class ReservationsService {
         }
       })
 
-      if(findRoom){
+      if (findRoom) {
         let findReservation = await this.prisma.reservations.findFirst({
-            where:{
-                room_id
-            }
-          })
-    
-          if(findReservation){
-            throw new NotFoundException({
-                statusCode: 400,
-                message: "Request is invalid",
-                content: "This room is already booked",
-                dateTime: new Date().toISOString()
-              }); 
+          where: {
+            room_id
           }
-          else{
-            let newData = {
-                room_id,
-                start_date,
-                end_date,
-                guest_amount,
-                user_id,
-              };
-    
-              console.log(newData);
-              await this.prisma.reservations.create({
-                data: newData,
-              });
-    
-              return {
-                statusCode: 201,
-                message: 'Create reservation successfully',
-                content: newData,
-                dateTime: new Date().toISOString(),
-              };
-          }
+        })
+
+        if (findReservation) {
+          throw new BadRequestException({
+            statusCode: 400,
+            message: "Request is invalid",
+            content: "This room is already booked",
+            dateTime: new Date().toISOString()
+          });
+        }
+        else {
+          let newData = {
+            room_id,
+            start_date: new Date(),
+            end_date: new Date(),
+            guest_amount,
+            user_id: userId
+          };
+
+          await this.prisma.reservations.create({
+            data: newData,
+          });
+
+          return {
+            statusCode: 201,
+            message: 'Create reservation successfully',
+            content: newData,
+            dateTime: new Date().toISOString(),
+          };
+        }
       }
       else{
         throw new NotFoundException({
             statusCode: 404,
             message: "Request is invalid",
-            content: "There's no room with that id",
+            content: "Room not found",
             dateTime: new Date().toISOString()
           }); 
       }
- 
-    // } catch (err) {
-    //   throw new HttpException(err.response, err.status);
-    // }
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
+    }
   }
 
-  //   get reservation by id
+  // Get reservation by id
   async getReservationById(reservation_id) {
     try {
       let checkReservation = await this.prisma.reservations.findFirst({
@@ -121,7 +120,7 @@ export class ReservationsService {
     }
   }
 
-//   get reservation by user id
+  // Get reservation by user id
   async getReservationByUserId(token) {
     // try {
     let decodedToken = await this.jwtService.decode(token);
