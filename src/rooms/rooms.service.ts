@@ -75,7 +75,7 @@ export class RoomsService {
             let filteredItems = await this.prisma.rooms.findMany({
                 where: {
                     room_name: {
-                        contains: keyword['room_name']
+                        contains: keyword
                     }
                 }
             });
@@ -83,7 +83,7 @@ export class RoomsService {
             if (keyword) {
                 filteredItems = filteredItems.filter(item => item.room_name.toLowerCase().includes(keyword.toLowerCase())); 
             }
-            // console.log("keyword", keyword);
+            console.log("keyword", keyword);
             // console.log("filteredItems", filteredItems); 
 
             const itemSlice = filteredItems.slice(startIndex, endIndex); 
