@@ -29,10 +29,10 @@ export class ReservationsController {
     return this.reservationsService.createReservation(reservation,token)
   } 
 
-  // Get reservation by id 
-  @ApiParam({ name: 'reservation_id', type: 'number' })
+  // Get reservation by id
+  @ApiParam({ name: 'reservation_id'})
   @Get("get-reservation-by-id/:reservation_id")
-  getReservationById(@Param() reservationId:number){
+  getReservationById(@Param("reservation_id") reservationId:number){
     return this.reservationsService.getReservationById(Number(reservationId))
   }
 

@@ -31,8 +31,6 @@ export class ReservationsService {
       let decodedToken = await this.jwtService.decode(token);
       let userId = decodedToken['user_id'];
 
-      // console.log("userId", userId); 
-
       let { room_id, start_date, end_date, guest_amount } = reservation;
 
       let findRoom = await this.prisma.rooms.findFirst({
@@ -92,7 +90,7 @@ export class ReservationsService {
 
   // Get reservation by reservation_id
   async getReservationById(reservationId) {
-    // try {
+    try {
       let checkReservation = await this.prisma.reservations.findFirst({
         where: {
           reservation_id: reservationId,
@@ -115,15 +113,15 @@ export class ReservationsService {
           dateTime: new Date().toISOString(),
         }); 
       }
-    // } catch (err) {
-    //   throw new HttpException(err.response, err.status);
-    // }
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
+    }
   }
   
 
   // Get reservation by user id
   async getReservationByUserId(token) {
-    // try {
+    try {
     let decodedToken = await this.jwtService.decode(token);
     let userId = decodedToken['user_id'];
     console.log(userId)
@@ -151,8 +149,8 @@ export class ReservationsService {
         dateTime: new Date().toISOString()
       });
     }
-    // } catch (err) {
-    //     throw new HttpException(err.response, err.status);
-    // }
+    } catch (err) {
+        throw new HttpException(err.response, err.status);
+    }
   }
 }
