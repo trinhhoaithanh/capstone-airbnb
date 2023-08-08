@@ -20,6 +20,7 @@ export class UsersService {
       
       return {
         statusCode: 200,
+        message: "Get users successfully!",
         content: data,
         dateTime: new Date().toISOString()
       } 
@@ -61,6 +62,7 @@ export class UsersService {
 
         return {
           statusCode: 200,
+          message: "Create user successfully!",
           content: newUser,
           dateTime: new Date().toISOString(),
         };
@@ -118,6 +120,7 @@ export class UsersService {
       if (checkUser) {
           return {
             statusCode: 200,
+            message: "Get user successfully!",
             content: data,
             dateTime: new Date().toISOString()
           }
@@ -148,6 +151,7 @@ export class UsersService {
       if (checkName.length > 0) {
         return {
           statusCode: 200,
+          message: "Get users successfully!",
           content: checkName,
           dateTime: new Date().toISOString()
         }
@@ -190,6 +194,7 @@ export class UsersService {
 
       return {
         statusCode: 200,
+        message: "Update user successfully!",
         content: newData,
         dateTime: new Date().toISOString()
       }
@@ -216,6 +221,7 @@ export class UsersService {
 
       return {
         statusCode: 200,
+        message: "Upload avatar successfully!",
         content: userInfo,
         dateTime: new Date().toISOString()
       }     

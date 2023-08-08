@@ -95,7 +95,7 @@ export class ReviewsService {
 
           return {
             statusCode: 200,
-            message: "Get reviews by room_id successfully!",
+            message: "Get reviews successfully!",
             content: newData,
             dateTime: new Date().toISOString()
           }
