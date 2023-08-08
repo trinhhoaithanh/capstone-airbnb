@@ -172,7 +172,8 @@ export class UsersService {
   async updateUser(token, userUpdate){
     try{
       const decodedToken = await this.jwtService.decode(token)
-      const userId = decodedToken['user_id']
+      const userId = decodedToken['user_id'] 
+      console.log("userId", userId); 
 
       const {full_name, email, birth_day, gender, user_role, phone} = userUpdate;
 
