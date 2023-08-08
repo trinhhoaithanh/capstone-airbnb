@@ -8,72 +8,72 @@ import { Review } from './entities/review.entity';
 @Injectable()
 export class ReviewsService {
 
-    constructor(private jwtService:JwtService) {}
+  constructor(private jwtService: JwtService) { }
 
-    prisma = new PrismaClient()
+  prisma = new PrismaClient()
 
-    // Get comments
-    async getComment(){
-        try{
-            let checkReview = await this.prisma.reviews.findMany()
+  // Get comments
+  async getComment() {
+    try {
+      let checkReview = await this.prisma.reviews.findMany()
 
-            if(checkReview.length >0){
-                return {
-                    statusCode:200,
-                    content:checkReview,
-                    dateTime: new Date().toISOString()
-                }
-            }
-            else{
-                throw new NotFoundException({
-                    statusCode: 404,
-                    message: "Request is invalid",
-                    content: "There's no comment",
-                    dateTime: new Date().toISOString()
-                  }); 
-            }
-
-
-      
+      if (checkReview.length > 0) {
+        return {
+          statusCode: 200,
+          content: checkReview,
+          dateTime: new Date().toISOString()
         }
-        catch(err){
-            throw new HttpException(err.response, err.status); 
-        }
+      }
+      else {
+        throw new NotFoundException({
+          statusCode: 404,
+          message: "Request is invalid",
+          content: "There's no comment",
+          dateTime: new Date().toISOString()
+        });
+      }
+
+
+
     }
-
-    // Update comment
-    async updateComment(token, review_id, commentUpdate){
-        try {
-            const decodedToken = await this.jwtService.decode(token)
-            const userId = decodedToken['user_id']
-
-            let {review_id, room_id, user_id, review_date, content, rating} = commentUpdate
-
-            await this.prisma.reviews.update({
-                where:{
-                    review_id:review_id,
-                    user_id:userId
-                },
-                data:commentUpdate
-            })
-            return {
-                statusCode:200,
-                message: "Update review successfully",
-                content:commentUpdate,
-                dateTime:new Date().toISOString()
-            }
-        } catch (err) {
-            throw new HttpException(err.response, err.status); 
-        }
+    catch (err) {
+      throw new HttpException(err.response, err.status);
     }
-  
+  }
+
+  // Update comment
+  async updateComment(token, review_id, commentUpdate) {
+    try {
+      const decodedToken = await this.jwtService.decode(token)
+      const userId = decodedToken['user_id']
+
+      let { review_id, room_id, user_id, review_date, content, rating } = commentUpdate
+
+      await this.prisma.reviews.update({
+        where: {
+          review_id: review_id,
+          user_id: userId
+        },
+        data: commentUpdate
+      })
+      return {
+        statusCode: 200,
+        message: "Update review successfully",
+        content: commentUpdate,
+        dateTime: new Date().toISOString()
+      }
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
+    }
+  }
+
   // Create review
   async createReview(token: string, newReview: Review) {
     try {
       const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken["user_id"]; 
+      const userId = decodedToken["user_id"];
 
-      const {room_id, content, rating} = newReview; 
+      const { room_id, content, rating } = newReview;
 
       const newData = {
         room_id,
@@ -81,13 +81,13 @@ export class ReviewsService {
         review_date: new Date(),
         content,
         rating
-      }; 
+      };
 
       let checkRoom = await this.prisma.rooms.findFirst({
         where: {
           room_id
         }
-      }); 
+      });
 
       if (checkRoom) {
         await this.prisma.reviews.create({
@@ -108,7 +108,7 @@ export class ReviewsService {
           dateTime: new Date().toISOString()
         })
       }
-    
+
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -139,10 +139,10 @@ export class ReviewsService {
               users: true,
               rooms: true
             }
-          }); 
+          });
           // console.log("data", data)
-          
-          const [{review_id, users, content, review_date, rooms}] = data; 
+
+          const [{ review_id, users, content, review_date, rooms }] = data;
           const newData = {
             review_id,
             room_name: rooms.room_name,
@@ -168,7 +168,7 @@ export class ReviewsService {
         }
       } else {
         // When room doesn't exist 
-        throw new NotFoundException ({
+        throw new NotFoundException({
           statusCode: 404,
           message: "Request is invalid",
           content: "Room not found",

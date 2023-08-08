@@ -8,9 +8,9 @@ import { check } from 'prettier';
 
 @Injectable()
 export class RoomsService {
-  
+
     prisma = new PrismaClient();
-    constructor(private jwtService: JwtService) {} 
+    constructor(private jwtService: JwtService) { }
 
     // Get rooms
     async getRooms() {
@@ -20,18 +20,18 @@ export class RoomsService {
                 message: "Get all rooms successfully!",
                 content: await this.prisma.rooms.findMany(),
                 dateTime: new Date().toISOString()
-            } 
+            }
         } catch (err) {
             throw new HttpException(err.response, err.status);
-        }   
+        }
     }
 
     // Create room
     async createRoom(token, room) {
-        try { 
+        try {
 
-            const {room_name, client_number, bed_room, bed, bath_room, description, price, washing_machine, iron, tivi, air_conditioner, wifi, kitchen, parking, pool, location_id, image} = room;
-            
+            const { room_name, client_number, bed_room, bed, bath_room, description, price, washing_machine, iron, tivi, air_conditioner, wifi, kitchen, parking, pool, location_id, image } = room;
+
             let newRoom = {
                 room_name, client_number, bed_room, bed, bath_room, description, price, washing_machine, iron, tivi, air_conditioner, wifi, kitchen, parking, pool, location_id, image
             }
@@ -40,13 +40,13 @@ export class RoomsService {
                 where: {
                     location_id
                 }
-            }); 
+            });
 
             if (checkLocation) {
                 await this.prisma.rooms.create({
                     data: newRoom
-                }); 
-    
+                });
+
                 return {
                     statusCode: 201,
                     message: "Create room successfully",
@@ -62,6 +62,45 @@ export class RoomsService {
                 })
             }
         } catch (err) {
+            throw new HttpException(err.response, err.status);
+        }
+    }
+
+    // Get rooms by pagination
+    async getRoomsByPagination(pageIndex, pageSize, keyword) {
+        try { 
+            const startIndex = (pageIndex - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+
+            let filteredItems = await this.prisma.rooms.findMany({
+                where: {
+                    room_name: {
+                        contains: keyword['room_name']
+                    }
+                }
+            });
+
+            if (keyword) {
+                filteredItems = filteredItems.filter(item => item.room_name.toLowerCase().includes(keyword.toLowerCase())); 
+            }
+            // console.log("keyword", keyword);
+            // console.log("filteredItems", filteredItems); 
+
+            const itemSlice = filteredItems.slice(startIndex, endIndex); 
+            return {
+                statusCode: 200,
+                message: "Get rooms successfully",
+                content: {
+                    pageIndex,
+                    pageSize,
+                    totalRow: filteredItems.length,
+                    keyword: `Room name LIKE %${keyword}%`,
+                    data: itemSlice
+                }, 
+                dateTime: new Date().toISOString()
+            }
+             
+        } catch (err) {
             throw new HttpException(err.response, err.status); 
         }
     }
@@ -73,7 +112,7 @@ export class RoomsService {
                 where: {
                     room_id: roomId
                 }
-            }); 
+            });
 
             if (checkRoom) {
                 return {
@@ -91,7 +130,7 @@ export class RoomsService {
                 })
             }
         } catch (err) {
-            throw new HttpException(err.response, err.status); 
+            throw new HttpException(err.response, err.status);
         }
     }
 }

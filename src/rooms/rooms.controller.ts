@@ -30,6 +30,16 @@ export class RoomsController {
     return this.roomsService.createRoom(token, room); 
   }
 
+  // Get rooms by search pagination
+  @Get("get-rooms-by-pagination")
+  getRoomsByPagination(
+    @Query("pageIndex") pageIndex: number,
+    @Query("pageSize") pageSize: number,
+    @Query("keyword") keyword: string
+  ) {
+    return this.roomsService.getRoomsByPagination(pageIndex, pageSize, keyword); 
+  }
+
   // Get room by room_id
   @Get("get-room-by-id/:room_id")
   getRoomById(@Query("room_id") roomId: number) {

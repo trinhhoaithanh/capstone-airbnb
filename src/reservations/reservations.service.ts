@@ -113,7 +113,7 @@ export class ReservationsService {
           message: 'Request is invalid',
           content: 'Reservation is not found',
           dateTime: new Date().toISOString(),
-        });
+        }); 
       }
     // } catch (err) {
     //   throw new HttpException(err.response, err.status);
@@ -122,37 +122,37 @@ export class ReservationsService {
   
 
   // Get reservation by user id
-  async getReservationByUserId(token) {
-    // try {
-    let decodedToken = await this.jwtService.decode(token);
-    let userId = decodedToken['user_id'];
-    console.log(userId)
+  // async getReservationByUserId(token) {
+  //   // try {
+  //   let decodedToken = await this.jwtService.decode(token);
+  //   let userId = decodedToken['user_id'];
+  //   console.log(userId)
 
-    let checkReservation = await this.prisma.reservations.findMany({
-      where: {
-        user_id: userId
-      }
-    })
-    console.log(checkReservation)
+  //   let checkReservation = await this.prisma.reservations.findMany({
+  //     where: {
+  //       user_id: userId
+  //     }
+  //   })
+  //   console.log(checkReservation)
 
-    if (checkReservation.length > 0) {
-      return {
-        statusCode: 200,
-        message: 'Get reservations successfully!',
-        content: checkReservation,
-        dateTime: new Date().toISOString(),
-      }
-    }
-    else {
-      throw new NotFoundException({
-        statusCode: 400,
-        message: "Request is invalid",
-        content: "This user has not reserved any room yet",
-        dateTime: new Date().toISOString()
-      });
-    }
-    // } catch (err) {
-    //     throw new HttpException(err.response, err.status);
-    // }
-  }
+  //   if (checkReservation.length > 0) {
+  //     return {
+  //       statusCode: 200,
+  //       message: 'Get reservations successfully!',
+  //       content: checkReservation,
+  //       dateTime: new Date().toISOString(),
+  //     }
+  //   }
+  //   else {
+  //     throw new NotFoundException({
+  //       statusCode: 400,
+  //       message: "Request is invalid",
+  //       content: "This user has not reserved any room yet",
+  //       dateTime: new Date().toISOString()
+  //     });
+  //   }
+  //   // } catch (err) {
+  //   //     throw new HttpException(err.response, err.status);
+  //   // }
+  // }
 }

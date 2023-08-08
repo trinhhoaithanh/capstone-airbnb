@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post} from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Query} from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -46,5 +46,6 @@ export class ReservationsController {
   getReservationByUserId(@Headers("token") token){
     return this.reservationsService.getReservationByUserId(token)
   }
+
 
 }
