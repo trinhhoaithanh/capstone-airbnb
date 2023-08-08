@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
@@ -9,6 +9,12 @@ import { ApiHeader, ApiTags } from '@nestjs/swagger';
 @Controller('rooms')
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
+
+  // Get rooms 
+  @Get("get-rooms")
+  getRooms() {
+    return this.roomsService.getRooms(); 
+  }
 
   // Create room 
   @ApiHeader({

@@ -11,6 +11,20 @@ export class RoomsService {
     prisma = new PrismaClient();
     constructor(private jwtService: JwtService) {} 
 
+    // Get rooms
+    async getRooms() {
+        try {
+            return {
+                statusCode: 200,
+                message: "Get all rooms successfully!",
+                content: await this.prisma.rooms.findMany(),
+                dateTime: new Date().toISOString()
+            } 
+        } catch (err) {
+            throw new HttpException(err.response, err.status);
+        }   
+    }
+
     // Create room
     async createRoom(token, room) {
         try { 
