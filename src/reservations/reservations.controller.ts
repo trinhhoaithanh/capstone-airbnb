@@ -7,4 +7,6 @@ import { UpdateReservationDto } from './dto/update-reservation.dto';
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
 
+  // Book room 
+  
 }
