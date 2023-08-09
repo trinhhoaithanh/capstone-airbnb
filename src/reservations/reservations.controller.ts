@@ -63,6 +63,4 @@ export class ReservationsController {
   ) {
     return this.reservationsService.updateReservation(+reservationId, token, reservationUpdate);
   }
-
-
 }
