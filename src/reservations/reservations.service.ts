@@ -3,6 +3,7 @@ import { BadRequestException, HttpException, Injectable, NotFoundException } fro
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { JwtService } from '@nestjs/jwt';
+import { use } from 'passport';
 
 @Injectable()
 export class ReservationsService {
@@ -118,8 +119,7 @@ export class ReservationsService {
     }
   }
   
-
-  // Get reservation by user id
+  // Get reservation by user_id
   async getReservationByUserId(token) {
     try {
     let decodedToken = await this.jwtService.decode(token);
@@ -151,6 +151,67 @@ export class ReservationsService {
     }
     } catch (err) {
         throw new HttpException(err.response, err.status);
+    }
+  }
+
+  // Update reservation
+  async updateReservation(reservationId, token, reservationUpdate) {
+    try {
+      const decodedToken = await this.jwtService.decode(token);
+      const userId = decodedToken["user_id"]; 
+
+      const { room_id, start_date, end_date, guest_amount } = reservationUpdate; 
+
+      let newData = {
+        room_id,
+        start_date,
+        end_date,
+        guest_amount
+      }
+
+      let checkReservation = await this.prisma.reservations.findFirst({
+        where: {
+          reservation_id: reservationId
+        }
+      });
+
+      if (checkReservation) {
+        let checkUser = await this.prisma.reservations.findFirst({
+          where: {
+            user_id: userId
+          }
+        });
+
+        if (checkUser) {
+          return {
+            statusCode: 200,
+            message: "Update reservation successfully!",
+            content: await this.prisma.reservations.update({
+              where: {
+                reservation_id: reservationId
+              },
+              data: newData
+            }),
+            dateTime: new Date().toISOString()
+          }
+        } else {
+          throw new BadRequestException({
+            statusCode: 400,
+            message: "Request is invalid",
+            content: "You are not allowed to update this",
+            dateTime: new Date().toISOString()
+          })
+        }
+      } else {
+        throw new NotFoundException ({
+          statusCode: 404,
+          message: "Request is invalid",
+          content: "Reservation not found",
+          dateTime: new Date().toISOString()
+        })
+      }
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
     }
   }
 }
