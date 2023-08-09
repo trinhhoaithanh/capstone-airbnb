@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -175,6 +175,7 @@ export class ReservationsService {
         }
       });
 
+      // Check if reservation_id exists in reservations table
       if (checkReservation) {
         let checkUser = await this.prisma.reservations.findFirst({
           where: {
@@ -182,6 +183,7 @@ export class ReservationsService {
           }
         });
 
+        // Check if user_id matches that reservation_id
         if (checkUser) {
           return {
             statusCode: 200,
@@ -195,8 +197,8 @@ export class ReservationsService {
             dateTime: new Date().toISOString()
           }
         } else {
-          throw new BadRequestException({
-            statusCode: 400,
+          throw new ForbiddenException({
+            statusCode: 403,
             message: "Request is invalid",
             content: "You are not allowed to update this",
             dateTime: new Date().toISOString()
