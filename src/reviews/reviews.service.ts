@@ -12,8 +12,8 @@ export class ReviewsService {
 
   prisma = new PrismaClient()
 
-  // Get comments
-  async getComment() {
+  // Get reviews
+  async getReviews() {
     try {
       let checkReview = await this.prisma.reviews.findMany()
 
@@ -41,25 +41,25 @@ export class ReviewsService {
     }
   }
 
-  // Update comment
-  async updateComment(token, review_id, commentUpdate) {
+  // Update review
+  async updateReview(token, review_id, reviewUpdate) {
     try {
       const decodedToken = await this.jwtService.decode(token)
       const userId = decodedToken['user_id']
 
-      let { review_id, room_id, user_id, review_date, content, rating } = commentUpdate
+      let { review_id, room_id, user_id, review_date, content, rating } = reviewUpdate
 
       await this.prisma.reviews.update({
         where: {
           review_id: review_id,
           user_id: userId
         },
-        data: commentUpdate
+        data: reviewUpdate
       })
       return {
         statusCode: 200,
         message: "Update review successfully",
-        content: commentUpdate,
+        content: reviewUpdate,
         dateTime: new Date().toISOString()
       }
     } catch (err) {

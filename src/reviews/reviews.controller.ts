@@ -11,9 +11,9 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) { }
 
   // Get reviews 
-  @Get("get-comments")
-  getComment() {
-    return this.reviewsService.getComment()
+  @Get("get-reviews")
+  getReviews() {
+    return this.reviewsService.getReviews()
   }
 
   // Update review
@@ -22,9 +22,9 @@ export class ReviewsController {
     description: 'Your authentication token',
     required: true,
   })
-  @Put("update-comment/:comment_id")
-  updateComment(@Headers("token") token, @Param("review_id") review_id: number, @Body() commentUpdate) {
-    return this.reviewsService.updateComment(token, Number(review_id), commentUpdate)
+  @Put("update-review/:review_id")
+  updateReview(@Headers("token") token, @Param("review_id") review_id: number, @Body() reviewUpdate) {
+    return this.reviewsService.updateReview(token, Number(review_id), reviewUpdate)
   }
   
   // Create review
