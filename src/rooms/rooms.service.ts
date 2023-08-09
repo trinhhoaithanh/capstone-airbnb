@@ -133,4 +133,37 @@ export class RoomsService {
             throw new HttpException(err.response, err.status);
         }
     }
+
+    // get room by location id 
+    async getRoomByLocationId(locationId:number)
+    {
+        try {
+            let checkRoomByLocation = await this.prisma.rooms.findMany({
+                where:
+                {
+                    location_id:locationId
+                }
+            })
+    
+            if(checkRoomByLocation.length>0){
+                return {
+                    statusCode: 200,
+                        message: "Get room by location id successfully!",
+                        content: checkRoomByLocation,
+                        dateTime: new Date().toISOString()
+                }
+            }
+            else{
+                throw new NotFoundException({
+                    statusCode: 404,
+                    message: "Request is invalid",
+                    content: "Invalid location",
+                    dateTime: new Date().toISOString()
+                })
+            }
+        } catch (err) {
+            throw new HttpException(err.response, err.status);
+        }
+        
+    }
 }

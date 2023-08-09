@@ -45,4 +45,10 @@ export class RoomsController {
   getRoomById(@Query("room_id") roomId: number) {
     return this.roomsService.getRoomById(+roomId); 
   }
+
+  // Get room by location_id
+  @Get("get-room-by-location-id")
+  getRoomByLocationId(@Query("location_id") locationId:number){
+    return this.roomsService.getRoomByLocationId(Number(locationId))
+  }
 }
