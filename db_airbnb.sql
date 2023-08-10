@@ -44,9 +44,6 @@ CREATE TABLE rooms(
 	image VARCHAR(250)
 );
 
-
-
-
 CREATE TABLE reservations(
 	reservation_id INT PRIMARY KEY AUTO_INCREMENT,
 	room_id INT,
@@ -57,7 +54,6 @@ CREATE TABLE reservations(
 	user_id INT,
 	FOREIGN KEY (user_id) REFERENCES users(user_id)
 );	
-
 
 CREATE TABLE reviews(
 	review_id INT PRIMARY KEY AUTO_INCREMENT,
