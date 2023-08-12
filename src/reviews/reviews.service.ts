@@ -1,42 +1,34 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import { Review } from './entities/review.entity';
 
 @Injectable()
 export class ReviewsService {
+  constructor(private jwtService: JwtService) {}
 
-  constructor(private jwtService: JwtService) { }
-
-  prisma = new PrismaClient()
+  prisma = new PrismaClient();
 
   // Get reviews
   async getReviews() {
     try {
-      let checkReview = await this.prisma.reviews.findMany()
+      let checkReview = await this.prisma.reviews.findMany();
 
       if (checkReview.length > 0) {
         return {
           statusCode: 200,
           content: checkReview,
-          dateTime: new Date().toISOString()
-        }
-      }
-      else {
+          dateTime: new Date().toISOString(),
+        };
+      } else {
         throw new NotFoundException({
           statusCode: 404,
-          message: "Request is invalid",
+          message: 'Request is invalid',
           content: "There's no comment",
-          dateTime: new Date().toISOString()
+          dateTime: new Date().toISOString(),
         });
       }
-
-
-
-    }
-    catch (err) {
+    } catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
@@ -44,24 +36,25 @@ export class ReviewsService {
   // Update review
   async updateReview(token, review_id, reviewUpdate) {
     try {
-      const decodedToken = await this.jwtService.decode(token)
-      const userId = decodedToken['user_id']
+      const decodedToken = await this.jwtService.decode(token);
+      const userId = decodedToken['user_id'];
 
-      let { review_id, room_id, user_id, review_date, content, rating } = reviewUpdate
+      let { review_id, room_id, user_id, review_date, content, rating } =
+        reviewUpdate;
 
       await this.prisma.reviews.update({
         where: {
           review_id: review_id,
-          user_id: userId
+          user_id: userId,
         },
-        data: reviewUpdate
-      })
+        data: reviewUpdate,
+      });
       return {
         statusCode: 200,
-        message: "Update review successfully",
+        message: 'Update review successfully',
         content: reviewUpdate,
-        dateTime: new Date().toISOString()
-      }
+        dateTime: new Date().toISOString(),
+      };
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -71,7 +64,7 @@ export class ReviewsService {
   async createReview(token: string, newReview: Review) {
     try {
       const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken["user_id"];
+      const userId = decodedToken['user_id'];
 
       const { room_id, content, rating } = newReview;
 
@@ -80,35 +73,34 @@ export class ReviewsService {
         user_id: +userId,
         review_date: new Date(),
         content,
-        rating
+        rating,
       };
 
       let checkRoom = await this.prisma.rooms.findFirst({
         where: {
-          room_id
-        }
+          room_id,
+        },
       });
 
       if (checkRoom) {
         await this.prisma.reviews.create({
-          data: newData
+          data: newData,
         });
 
         return {
           statusCode: 201,
-          message: "Create review successfully",
+          message: 'Create review successfully',
           content: newData,
-          dateTime: new Date().toISOString()
-        }
+          dateTime: new Date().toISOString(),
+        };
       } else {
         throw new NotFoundException({
           statusCode: 404,
-          message: "Request is invalid",
-          content: "Room not found!",
-          dateTime: new Date().toISOString()
-        })
+          message: 'Request is invalid',
+          content: 'Room not found!',
+          dateTime: new Date().toISOString(),
+        });
       }
-
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -119,28 +111,27 @@ export class ReviewsService {
     try {
       let checkRoom = await this.prisma.rooms.findFirst({
         where: {
-          room_id: roomId
-        }
+          room_id: roomId,
+        },
       });
 
       if (checkRoom) {
         let checkRoomInReview = await this.prisma.reviews.findFirst({
           where: {
-            room_id: roomId
-          }
+            room_id: roomId,
+          },
         });
 
         if (checkRoomInReview) {
           let data = await this.prisma.reviews.findMany({
             where: {
-              room_id: roomId
+              room_id: roomId,
             },
             include: {
               users: true,
-              rooms: true
-            }
+              rooms: true,
+            },
           });
-          // console.log("data", data)
 
           const [{ review_id, users, content, review_date, rooms }] = data;
           const newData = {
@@ -148,32 +139,32 @@ export class ReviewsService {
             room_name: rooms.room_name,
             user_name: users.full_name,
             content,
-            review_date
-          }
+            review_date,
+          };
 
           return {
             statusCode: 200,
-            message: "Get reviews successfully!",
+            message: 'Get reviews successfully!',
             content: newData,
-            dateTime: new Date().toISOString()
-          }
+            dateTime: new Date().toISOString(),
+          };
         } else {
-          // When room doesn't have any reviews yet 
-          return ({
+          // When room doesn't have any reviews yet
+          return {
             statusCode: 200,
             message: "This room doesn't have any reviews yet!",
             content: null,
-            dateTime: new Date().toISOString()
-          })
+            dateTime: new Date().toISOString(),
+          };
         }
       } else {
-        // When room doesn't exist 
+        // When room doesn't exist
         throw new NotFoundException({
           statusCode: 404,
-          message: "Request is invalid",
-          content: "Room not found",
-          dateTime: new Date().toISOString()
-        })
+          message: 'Request is invalid',
+          content: 'Room not found',
+          dateTime: new Date().toISOString(),
+        });
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
