@@ -1,6 +1,4 @@
 import { Injectable, HttpException, BadRequestException } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -47,7 +45,7 @@ export class AuthService {
 
         return {
           statusCode: 200,
-          message: "Sign up successfully!",
+          message: 'Sign up successfully!',
           content: newUser,
           dateTime: new Date().toISOString(),
         };
@@ -78,10 +76,10 @@ export class AuthService {
           );
           return {
             statusCode: 200,
-            message: "Login successfully!",
+            message: 'Login successfully!',
             content: {
               userLogin: checkUser,
-              token: tokenGenerate
+              token: tokenGenerate,
             },
             dateTime: new Date().toISOString(),
           };
@@ -89,19 +87,19 @@ export class AuthService {
           // throw new HttpException('Password is incorrect!', 400);
           throw new BadRequestException({
             statusCode: 400,
-            message: "Request is invalid",
-            content: "Password is incorrect!",
-            dateTime: new Date().toISOString()
-          }); 
+            message: 'Request is invalid',
+            content: 'Password is incorrect!',
+            dateTime: new Date().toISOString(),
+          });
         }
       } else {
         // throw new HttpException('Email or password is incorrect!', 400);
         throw new BadRequestException({
           statusCode: 400,
-          message: "Request is invalid",
-          content: "Email or password is incorrect!",
-          dateTime: new Date().toISOString()
-        })
+          message: 'Request is invalid',
+          content: 'Email or password is incorrect!',
+          dateTime: new Date().toISOString(),
+        });
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
