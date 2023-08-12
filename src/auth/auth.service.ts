@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { check } from 'prettier';
+import { Roles } from 'src/enum/roles.enum';
 
 @Injectable()
 export class AuthService {
@@ -14,21 +15,24 @@ export class AuthService {
 
   prisma = new PrismaClient();
 
-  // Sign up
+  // Signup
   async signUp(userSignup) {
     try {
-      let { email, pass_word, full_name, birth_day, gender, user_role, phone } =
-        userSignup;
-
-      // check email if exists
+      let { email, pass_word, full_name, birth_day, gender, user_role, phone } = userSignup;
+        
+      // Check email if exists
       let checkEmail = await this.prisma.users.findFirst({
         where: {
           email,
-        },
+        }
       });
 
       if (checkEmail) {
-        throw new HttpException('Email is already existed', 400);
+        throw new BadRequestException({
+          statusCode: 400,
+          message: "Email already exists!",
+          dateTime: new Date().toISOString()
+        })
       } else {
         let newUser = {
           email,
@@ -36,7 +40,7 @@ export class AuthService {
           full_name,
           birth_day,
           gender,
-          user_role,
+          user_role: Roles.USER,
           phone,
         };
 
@@ -53,6 +57,51 @@ export class AuthService {
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
+    }
+  }
+
+  // Signup for Admin
+  async createAdmin(adminSignup) {
+    try {
+      const {email, pass_word, full_name, birth_day, gender, user_role, phone} = adminSignup;
+
+      // Check email if exists
+      let checkEmail = await this.prisma.users.findFirst({
+        where: {
+          email
+        }
+      });
+
+      if (checkEmail) {
+        throw new BadRequestException({
+          statusCode: 400,
+          message: "Email already exists!",
+          dateTime: new Date().toISOString()
+        })
+      } else {
+        let newUser = {
+          email,
+          pass_word: bcrypt.hashSync(pass_word, 10),
+          full_name,
+          birth_day,
+          gender,
+          user_role: Roles.ADMIN,
+          phone,
+        };
+
+        await this.prisma.users.create({
+          data: newUser,
+        });
+
+        return {
+          statusCode: 200,
+          message: 'Sign up successfully!',
+          content: newUser,
+          dateTime: new Date().toISOString(),
+        };
+      }
+    } catch (err) {
+      throw new HttpException(err.response, err.status); 
     }
   }
 

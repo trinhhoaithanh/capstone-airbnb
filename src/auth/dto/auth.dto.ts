@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-class userType{
+export class userType{
  
     @ApiProperty()
     email:String;
@@ -25,12 +25,14 @@ class userType{
   
   }
 
-class loginType{
+export class loginType{
     @ApiProperty({default: "ngan@gmail.com"})
+    // @ApiProperty()
     email:String
 
     @ApiProperty({default: "1234"})
+    // @ApiProperty()
     pass_word:String
 }
 
-export {userType, loginType}
+

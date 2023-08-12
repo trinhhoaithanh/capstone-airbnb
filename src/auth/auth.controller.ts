@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  HttpCode,
-} from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaClient } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger/dist';
@@ -16,16 +11,21 @@ export class AuthController {
 
   prisma = new PrismaClient();
 
-  // Sign up
-  @HttpCode(201)
+  // Signup
   @Post('/sign-up')
-  signUp(@Body() body: userType) {
-    return this.authService.signUp(body);
-  } 
+  signUp(@Body() userSignup: userType) {
+    return this.authService.signUp(userSignup);
+  }
+  
+  // Signup for Admin
+  @Post("/register-admin")
+  createAdmin(@Body() adminSignup: userType) {
+    return this.authService.createAdmin(adminSignup); 
+  }
   
   // Login
   @Post('/login')
-  login(@Body() body: loginType) {
-    return this.authService.login(body);
+  login(@Body() userLogin: loginType) {
+    return this.authService.login(userLogin);
   }
 }
