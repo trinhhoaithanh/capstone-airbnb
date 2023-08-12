@@ -26,10 +26,10 @@ class userType{
   }
 
 class loginType{
-    @ApiProperty()
+    @ApiProperty({default: "ngan@gmail.com"})
     email:String
 
-    @ApiProperty()
+    @ApiProperty({default: "1234"})
     pass_word:String
 }
 

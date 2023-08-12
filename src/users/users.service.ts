@@ -1,7 +1,8 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { Roles } from 'src/enum/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -68,36 +69,47 @@ export class UsersService {
   }
 
   // Delete user
-  async deleteUserById(userId: number) {
+  async deleteUserById(delete_id: number, token: string) {
     try {
-      let checkUser = await this.prisma.users.findFirst({
-        where: {
-          user_id: userId,
-        },
-      });
+      const decodedToken = await this.jwtService.decode(token); 
+      const userId = decodedToken["user_id"]; 
+      const userRole = decodedToken["user_role"]; 
 
+      // Check the existence of the user to delete 
+      let checkUser = await this.prisma.users.findUnique({
+        where: {
+          user_id: delete_id
+        }
+      }); 
+       
       if (checkUser) {
-        await this.prisma.users.delete({
-          where: {
-            user_id: userId,
-          },
-        });
-        return {
-          statusCode: 200,
-          message: 'Delete user successfully!',
-          content: null,
-          dateTime: new Date().toISOString(),
-        };
+        if (userId === delete_id || userRole === Roles.ADMIN) {
+          return {
+            statusCode: 200,
+            message: "Delete user successfully!",
+            content: await this.prisma.users.delete({
+              where: {
+                user_id: delete_id
+              }
+            }),
+            dateTime: new Date().toISOString()
+          }
+        } else {
+          throw new ForbiddenException({
+            statusCode: 403,
+            message: "You don't have permission to access!",
+            dateTime: new Date().toISOString()
+          })
+        }
       } else {
         throw new NotFoundException({
           statusCode: 404,
-          message: 'User not found',
-          content: null,
-          dateTime: new Date().toISOString(),
-        });
+          message: "user not found",
+          dateTime: new Date().toISOString()
+        })
       }
     } catch (err) {
-      throw new HttpException(err.response, err.status);
+      throw new HttpException(err.response, err.status); 
     }
   }
 
@@ -205,7 +217,7 @@ export class UsersService {
   async updateUser(token, userUpdate) {
     try {
       const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
+      const userId = decodedToken['user_id']; 
 
       const { full_name, email, birth_day, gender, user_role, phone } =
         userUpdate;

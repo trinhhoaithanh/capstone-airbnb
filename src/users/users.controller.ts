@@ -36,9 +36,17 @@ export class UsersController {
   }
 
   // Delete user by id
+  @ApiHeader({
+    name: 'token',
+    description: 'Your authentication token',
+    required: true,
+  })
   @Delete('delete-user-by-id')
-  deleteUserById(@Query('id') userId: Number) {
-    return this.usersService.deleteUserById(Number(userId));
+  deleteUserById(
+    @Query('id') delete_id: Number,
+    @Headers("token") token
+  ) {
+    return this.usersService.deleteUserById(+delete_id, token);
   }
 
   // Pagination of users

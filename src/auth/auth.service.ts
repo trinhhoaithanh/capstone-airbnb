@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { check } from 'prettier';
 
 @Injectable()
 export class AuthService {
@@ -70,10 +71,12 @@ export class AuthService {
         if (bcrypt.compareSync(pass_word, checkUser.pass_word)) {
           checkUser = { ...checkUser, pass_word: '' };
 
+          // generate token with user_id and user_role inside 
           let tokenGenerate = await this.jwtService.signAsync(
-            { user_id: Number(checkUser.user_id) },
+            { user_id: Number(checkUser.user_id), user_role: checkUser.user_role },
             { secret: this.configService.get('KEY'), expiresIn: '60m' },
           );
+
           return {
             statusCode: 200,
             message: 'Login successfully!',
