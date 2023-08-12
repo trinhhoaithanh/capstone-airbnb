@@ -31,6 +31,12 @@ export class UsersController {
     return this.usersService.deleteUserById(Number(userId))
   }
 
+  // Pagination of users
+  @Get("get-users-by-pagination")
+  getUsersByPagination(@Query("pageIndex") pageIndex:number, @Query("pageSize") pageSize:number, @Query("keyword") keyword:string){
+    return this.usersService.getUsersByPagination(pageIndex,pageSize,keyword)
+  }
+
   // Get user by user_id
   @Get("get-user-by-id/:user_id")
   getUserById(@Query("id") userId: number) {

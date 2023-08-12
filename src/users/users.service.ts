@@ -107,6 +107,46 @@ export class UsersService {
     }
   }
 
+
+  // Get users pagination
+  async getUsersByPagination(pageIndex,pageSize,keyword){
+    try{
+      let startIndex = (pageIndex - 1) * pageSize
+      let endIndex = startIndex + pageSize;
+  
+      let filteredItems  = await this.prisma.users.findMany({
+        where:{
+          full_name:{
+            contains:keyword
+          }
+        }
+      })
+  
+      if(keyword){
+        filteredItems = filteredItems.filter(item => item.full_name.toLowerCase().includes(keyword.toLowerCase()))
+      }
+  
+      let itemSlice = filteredItems.slice(startIndex,endIndex)
+  
+      return {
+        statusCode:200,
+        message:"Get rooms successfully",
+        content:{
+          pageIndex,
+          pageSize,
+          totalRow:filteredItems.length,
+          keyword:`Name LIKE %${keyword}%`,
+          data:itemSlice
+        },
+        dateTime:new Date().toISOString()
+      }
+    }
+    catch(err){
+      throw new HttpException(err.response, err.status); 
+    }
+    
+  }
+
   // Get user by user_id
   async getUserById(userId: number) {
     try {
