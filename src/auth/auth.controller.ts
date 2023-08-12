@@ -21,7 +21,7 @@ export class AuthController {
     return this.authService.signUp(body);
   } 
   
-  // Login 
+  // Login Bad
   @Post("/login")
   login(@Body() body:loginType){
     return this.authService.login(body);
