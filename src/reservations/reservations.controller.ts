@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, Put, Query} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Query} from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
@@ -62,5 +62,15 @@ export class ReservationsController {
     @Body() reservationUpdate: UpdateReservationDto
   ) {
     return this.reservationsService.updateReservation(+reservationId, token, reservationUpdate);
+  }
+
+  // Delete reservation by reservation id
+  @ApiParam({
+    name: "reservation_id",
+    required: true
+  })
+  @Delete("delete-reservation-by-reservation-id/:reservation_id")
+  deleteReservationByReservationId(@Param("reservation_id") reservationId){
+    return this.reservationsService.deleteReservationByReservationId(Number(reservationId))
   }
 }

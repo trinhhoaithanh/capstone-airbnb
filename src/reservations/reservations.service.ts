@@ -216,4 +216,35 @@ export class ReservationsService {
       throw new HttpException(err.response, err.status);
     }
   }
+
+  // Delete reservation by reservation id
+  async deleteReservationByReservationId(reservationId){
+    let checkReservation = await this.prisma.reservations.findFirst({
+      where:{
+        reservation_id:reservationId
+      }
+    })
+
+    if(checkReservation){
+      await this.prisma.reservations.delete({
+        where:{
+          reservation_id:reservationId
+        }
+      })
+      return {
+        statusCode: 200,
+        message: "Delete reservation successfully!",
+        content: null,
+        dateTime: new Date().toISOString()
+      }
+    }
+    else{
+      throw new NotFoundException ({
+        statusCode: 404,
+        message: "Request is invalid",
+        content: "Reservation not found",
+        dateTime: new Date().toISOString()
+      })
+    }
+  }
 }
