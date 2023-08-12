@@ -1,15 +1,3 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Delete,
-  Headers,
-  Query,
-  Put,
-  UseInterceptors,
-  UploadedFile,
-} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBody, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
@@ -17,6 +5,7 @@ import { User } from './entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { FileUploadDto } from './dto/fileUploadDto.dto';
+import { Body, Controller, Delete, Get, Headers, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 
 @ApiTags('Users')
 @Controller('users')

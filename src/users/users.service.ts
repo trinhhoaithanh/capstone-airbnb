@@ -69,6 +69,7 @@ export class UsersService {
   }
 
   // Delete user
+  // Only user can delete himself or admin can delete anyone 
   async deleteUserById(delete_id: number, token: string) {
     try {
       const decodedToken = await this.jwtService.decode(token); 
@@ -183,7 +184,7 @@ export class UsersService {
   }
 
   // Get user by user_name
-  async getUserByName(userName: string) {
+  async getUserByName(userName) {
     try {
       let checkName = await this.prisma.users.findMany({
         where: {
@@ -193,12 +194,15 @@ export class UsersService {
         },
       });
 
+      // console.log("checkName", checkName)
+
       if (checkName.length > 0) {
         return {
           statusCode: 200,
           message: 'Get users successfully!',
+          total: checkName.length,
           content: checkName,
-          dateTime: new Date().toISOString(),
+          dateTime: new Date().toISOString()
         };
       } else {
         throw new NotFoundException({
