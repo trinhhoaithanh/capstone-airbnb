@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 
@@ -49,5 +49,37 @@ export class LocationService {
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
+  }
+
+  // Get location by location id
+  async getLocationByLocationId(locationId){
+    try{
+      let checkLocation = await this.prisma.location.findFirst({
+        where:{
+          location_id:locationId
+        }
+      })
+  
+      if(checkLocation){
+        return {
+          statusCode: 200,
+          message: 'Get location successfully!',
+          content: checkLocation,
+          dateTime: new Date().toISOString(),
+        };
+      }
+      else{
+        throw new NotFoundException({
+          statusCode: 404,
+          message: 'Request is invalid',
+          content: 'Location is not found',
+          dateTime: new Date().toISOString(),
+        });
+      }
+    }
+    catch(err){
+      throw new HttpException(err.response, err.status);
+    }
+    
   }
 }

@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { Location } from './entities/location.entity';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Location')
 @Controller('location')
@@ -23,5 +23,12 @@ export class LocationController {
   @Post('create-location')
   createLocation(@Headers('token') token, @Body() location: Location) {
     return this.locationService.createLocation(token, location);
+  }
+
+  // Get location by location id
+  @ApiParam({name:'location_id'})
+  @Get("get-location-by-location-id/:location_id")
+  getLocationByLocationId(@Param('location_id') locationId){
+    return this.locationService.getLocationByLocationId(Number(locationId))
   }
 }
