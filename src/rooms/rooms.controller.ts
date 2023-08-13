@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Headers, Post, Query } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
-import { Room } from './entities/room.entity';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { CreateRoomDto } from './dto/create-room.dto';
 
 @ApiTags('Rooms')
 @Controller('rooms')
@@ -14,14 +14,14 @@ export class RoomsController {
     return this.roomsService.getRooms();
   }
 
-  // Create room
+  // Create room 
   @ApiHeader({
     name: 'token',
     description: 'Your authentication token',
     required: true,
   })
   @Post('create-room')
-  createRoom(@Headers('token') token, @Body() room: Room) {
+  createRoom(@Headers('token') token, @Body() room: CreateRoomDto) {
     return this.roomsService.createRoom(token, room);
   }
 

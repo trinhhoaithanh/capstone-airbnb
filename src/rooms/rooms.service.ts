@@ -1,6 +1,7 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { Roles } from 'src/enum/roles.enum';
 
 @Injectable()
 export class RoomsService {
@@ -22,27 +23,14 @@ export class RoomsService {
   }
 
   // Create room
+  // Only admin can create new room
   async createRoom(token, room) {
     try {
-      const {
-        room_name,
-        client_number,
-        bed_room,
-        bed,
-        bath_room,
-        description,
-        price,
-        washing_machine,
-        iron,
-        tivi,
-        air_conditioner,
-        wifi,
-        kitchen,
-        parking,
-        pool,
-        location_id,
-        image,
-      } = room;
+      const decodedToken = await this.jwtService.decode(token);
+      const userId = decodedToken['user_id'];
+      const userRole = decodedToken['user_role'];
+
+      const { room_name, client_number, bed_room, bed, bath_room, description, price, washing_machine, iron, tivi, air_conditioner, wifi, kitchen, parking, pool, location_id, image } = room;
 
       let newRoom = {
         room_name,
@@ -64,30 +52,54 @@ export class RoomsService {
         image,
       };
 
-      let checkLocation = await this.prisma.location.findFirst({
+      // Check if user_id from token exists
+      let checkUser = await this.prisma.users.findUnique({
         where: {
-          location_id,
-        },
+          user_id: userId
+        }
       });
 
-      if (checkLocation) {
-        await this.prisma.rooms.create({
-          data: newRoom,
-        });
+      if (checkUser) {
+        // Check if user_role is admin 
+        if (userRole === Roles.ADMIN) {
+          // Check if location_id exists before creating new room
+          let checkLocation = await this.prisma.location.findUnique({
+            where: {
+              location_id
+            }
+          });
 
-        return {
-          statusCode: 201,
-          message: 'Create room successfully',
-          content: newRoom,
-          dateTime: new Date().toISOString(),
-        };
+          if (checkLocation) {
+            return {
+              statusCode: 201,
+              message: "Create room successfully!",
+              content: await this.prisma.rooms.create({
+                data: newRoom
+              }),
+              dateTime: new Date().toISOString()
+            }
+          } else {
+            throw new NotFoundException({
+              statusCode: 404,
+              message: "Request is invalid",
+              content: "Location not found!",
+              dateTime: new Date().toISOString()
+            })
+          }
+        } else {
+          throw new BadRequestException({
+            statusCode: 403,
+            message: "You don't have permission to access!",
+            dateTime: new Date().toISOString()
+          })
+        }
       } else {
         throw new NotFoundException({
           statusCode: 404,
-          message: 'Request is invalid',
-          content: 'Location not found',
-          dateTime: new Date().toISOString(),
-        });
+          message: "Request is invalid",
+          content: "User not found!",
+          dateTime: new Date().toISOString()
+        })
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
