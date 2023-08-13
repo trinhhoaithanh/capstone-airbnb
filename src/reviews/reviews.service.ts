@@ -154,7 +154,7 @@ export class ReviewsService {
       if (checkRoom) {
         let checkRoomInReview = await this.prisma.reviews.findMany({
           where: {
-            room_id: roomId,
+            room_id: roomId
           },
         });
 
@@ -169,18 +169,21 @@ export class ReviewsService {
             },
           });
 
-          const [{ review_id, users, content, review_date, rooms }] = data;
-          const newData = {
-            review_id,
-            room_name: rooms.room_name,
-            user_name: users.full_name,
-            content,
-            review_date,
-          };
-
+          let newData = data.map((review) => {
+            return {
+              review_id: review.review_id,
+              user_name: review.users.full_name,
+              room_name: review.rooms.room_name,
+              content: review.content,
+              date: review.review_date,
+              rating: review.rating
+            }
+          })
+         
           return {
             statusCode: 200,
             message: 'Get reviews successfully!',
+            total: data.length,
             content: newData,
             dateTime: new Date().toISOString(),
           };

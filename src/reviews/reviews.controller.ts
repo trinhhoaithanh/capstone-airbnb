@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
-import { ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Review } from './entities/review.entity';
 import { UpdateReviewDto } from './dto/update-review.dto';
 
@@ -55,8 +55,12 @@ export class ReviewsController {
   }
 
   // Get reviews by room_id
+  @ApiParam({
+    name: "room_id",
+    required: true
+  })
   @Get('get-review-by-room/:room_id')
-  getReviewByRoom(@Query('room_id') roomId: Number) {
+  getReviewByRoom(@Param('room_id') roomId: Number) {
     return this.reviewsService.getReviewByRoom(+roomId);
   }
 }
