@@ -1,7 +1,8 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import { Review } from './entities/review.entity';
+import { Roles } from 'src/enum/roles.enum';
 
 @Injectable()
 export class ReviewsService {
@@ -21,40 +22,75 @@ export class ReviewsService {
           dateTime: new Date().toISOString(),
         };
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: "There's no comment",
+        return{
+          statusCode: 200,
+          message: "There's no review",
+          content:checkReview ,
           dateTime: new Date().toISOString(),
-        });
+        };
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
 
-  // Update review
+  // Update review (only user can update his/her own review or admin can update)
   async updateReview(token, review_id, reviewUpdate) {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken['user_id'];
+      const userRole = decodedToken['user_role']
 
-      let { review_id, room_id, user_id, review_date, content, rating } =
-        reviewUpdate;
+      let checkReview = await this.prisma.reviews.findUnique({
+        where:{
+          review_id
+        }
+      })
 
-      await this.prisma.reviews.update({
-        where: {
-          review_id: review_id,
-          user_id: userId,
-        },
-        data: reviewUpdate,
-      });
-      return {
-        statusCode: 200,
-        message: 'Update review successfully',
-        content: reviewUpdate,
-        dateTime: new Date().toISOString(),
-      };
+      if(checkReview){
+        if(checkReview.user_id===userId || userRole === Roles.ADMIN){
+          let {  user_id, review_date, content, rating } =
+          reviewUpdate;
+  
+        let newReview = {
+      
+          user_id:userId, 
+          review_date: new Date(), 
+          content, 
+          rating
+        }
+  
+        await this.prisma.reviews.update({
+          where: {
+            review_id: review_id,
+          },
+          data: newReview,
+        });
+        return {
+          statusCode: 200,
+          message: 'Update review successfully',
+          content: newReview,
+          dateTime: new Date().toISOString(),
+        };
+        }
+        else{
+          throw new ForbiddenException({
+            statusCode:403,
+            message: "You don't have permission to access!",
+            dateTime: new Date().toISOString(),
+          })
+        }
+        
+      }
+      else{
+        throw new NotFoundException({
+          statusCode:404,
+          message: 'Request is invalid',
+          content: 'Review not found!',
+          dateTime: new Date().toISOString(),
+        })
+      }
+      
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -116,7 +152,7 @@ export class ReviewsService {
       });
 
       if (checkRoom) {
-        let checkRoomInReview = await this.prisma.reviews.findFirst({
+        let checkRoomInReview = await this.prisma.reviews.findMany({
           where: {
             room_id: roomId,
           },

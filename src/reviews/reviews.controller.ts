@@ -11,6 +11,7 @@ import {
 import { ReviewsService } from './reviews.service';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 import { Review } from './entities/review.entity';
+import { UpdateReviewDto } from './dto/update-review.dto';
 
 @ApiTags('Reviews')
 @Controller('reviews')
@@ -33,7 +34,7 @@ export class ReviewsController {
   updateReview(
     @Headers('token') token,
     @Param('review_id') review_id: number,
-    @Body() reviewUpdate,
+    @Body() reviewUpdate:UpdateReviewDto,
   ) {
     return this.reviewsService.updateReview(
       token,

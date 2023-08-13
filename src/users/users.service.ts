@@ -48,7 +48,7 @@ export class UsersService {
           full_name,
           birth_day,
           gender,
-          user_role,
+          user_role:Roles.USER,
           phone,
         };
 
@@ -222,7 +222,7 @@ export class UsersService {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken['user_id']; 
-
+      const userRole = decodedToken['user_role']
       const { full_name, email, birth_day, gender, user_role, phone } =
         userUpdate;
 
@@ -231,7 +231,7 @@ export class UsersService {
         email,
         birth_day,
         gender,
-        user_role,
+        user_role:userRole,
         phone,
       };
 
