@@ -1,4 +1,5 @@
-import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { responseArray, responseObject } from './../util/response-template';
+import { BadRequestException, ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -14,14 +15,8 @@ export class UsersService {
     try {
       let getUsers = await this.prisma.users.findMany();
       let data = getUsers.map((user) => ({ ...user, pass_word: '' }));
-
-      return {
-        statusCode: 200,
-        message: 'Get users successfully!',
-        total: data.length,
-        content: data,
-        dateTime: new Date().toISOString(),
-      };
+      
+      return responseArray(200, "Get users successfully!", data.length, data); 
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -30,8 +25,7 @@ export class UsersService {
   // Create a user
   async createUser(user) {
     try {
-      let { email, pass_word, full_name, birth_day, gender, user_role, phone } =
-        user;
+      let { email, pass_word, full_name, birth_day, gender, user_role, phone } = user;
 
       // check email if exists
       let checkEmail = await this.prisma.users.findFirst({
@@ -41,7 +35,7 @@ export class UsersService {
       });
 
       if (checkEmail) {
-        throw new HttpException('Email is already existed', 400);
+        throw new BadRequestException(responseObject(400, "Request is invalid", "Email already existed!"));  
       } else {
         let newUser = {
           email,
@@ -49,7 +43,7 @@ export class UsersService {
           full_name,
           birth_day,
           gender,
-          user_role:Roles.USER,
+          user_role: Roles.USER,
           phone,
         };
 

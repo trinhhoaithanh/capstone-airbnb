@@ -6,6 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { FileUploadDto } from './dto/fileUploadDto.dto';
 import { Body, Controller, Delete, Get, Headers, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -20,7 +21,7 @@ export class UsersController {
 
   // Create a user
   @Post('create-user')
-  createUser(@Body() user: User) {
+  createUser(@Body() user: CreateUserDto) {
     return this.usersService.createUser(user);
   }
 

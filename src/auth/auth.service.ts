@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { check } from 'prettier';
 import { Roles } from 'src/enum/roles.enum';
+import { responseObject } from 'src/util/response-template';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,7 @@ export class AuthService {
   // Signup
   async signUp(userSignup) {
     try {
-      let { email, pass_word, full_name, birth_day, gender, user_role, phone } = userSignup;
+      let { email, pass_word, full_name, birth_day, gender, phone } = userSignup;
         
       // Check email if exists
       let checkEmail = await this.prisma.users.findFirst({
@@ -28,11 +29,7 @@ export class AuthService {
       });
 
       if (checkEmail) {
-        throw new BadRequestException({
-          statusCode: 400,
-          message: "Email already exists!",
-          dateTime: new Date().toISOString()
-        })
+        throw new BadRequestException(responseObject(400, "Request is invalid", "Email already existed!")); 
       } else {
         let newUser = {
           email,
@@ -48,12 +45,7 @@ export class AuthService {
           data: newUser,
         });
 
-        return {
-          statusCode: 200,
-          message: 'Sign up successfully!',
-          content: newUser,
-          dateTime: new Date().toISOString(),
-        };
+        return responseObject(200, "Signup successfully!", newUser); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -63,7 +55,7 @@ export class AuthService {
   // Signup for Admin
   async createAdmin(adminSignup) {
     try {
-      const {email, pass_word, full_name, birth_day, gender, user_role, phone} = adminSignup;
+      const {email, pass_word, full_name, birth_day, gender, phone} = adminSignup;
 
       // Check email if exists
       let checkEmail = await this.prisma.users.findFirst({
@@ -73,11 +65,7 @@ export class AuthService {
       });
 
       if (checkEmail) {
-        throw new BadRequestException({
-          statusCode: 400,
-          message: "Email already exists!",
-          dateTime: new Date().toISOString()
-        })
+        throw new BadRequestException(responseObject(400, "Request is invalid", "Email already existed!")); 
       } else {
         let newUser = {
           email,
@@ -93,12 +81,7 @@ export class AuthService {
           data: newUser,
         });
 
-        return {
-          statusCode: 200,
-          message: 'Sign up successfully!',
-          content: newUser,
-          dateTime: new Date().toISOString(),
-        };
+        return responseObject(200, "Signup successfully!", newUser); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status); 
@@ -126,32 +109,12 @@ export class AuthService {
             { secret: this.configService.get('KEY'), expiresIn: '60m' },
           );
 
-          return {
-            statusCode: 200,
-            message: 'Login successfully!',
-            content: {
-              userLogin: checkUser,
-              token: tokenGenerate,
-            },
-            dateTime: new Date().toISOString(),
-          };
+          return responseObject(200, "Login successfully!", {userLogin: checkUser, token: tokenGenerate}); 
         } else {
-          // throw new HttpException('Password is incorrect!', 400);
-          throw new BadRequestException({
-            statusCode: 400,
-            message: 'Request is invalid',
-            content: 'Password is incorrect!',
-            dateTime: new Date().toISOString(),
-          });
+          throw new BadRequestException(responseObject(400, "Request is invalid", "Password is incorrect!")); 
         }
       } else {
-        // throw new HttpException('Email or password is incorrect!', 400);
-        throw new BadRequestException({
-          statusCode: 400,
-          message: 'Request is invalid',
-          content: 'Email or password is incorrect!',
-          dateTime: new Date().toISOString(),
-        });
+        throw new BadRequestException(responseObject(400, "Request is invalid", "Email or password is incorrect!")); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
