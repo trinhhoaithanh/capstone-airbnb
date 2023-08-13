@@ -18,6 +18,7 @@ export class UsersService {
       return {
         statusCode: 200,
         message: 'Get users successfully!',
+        total: data.length,
         content: data,
         dateTime: new Date().toISOString(),
       };

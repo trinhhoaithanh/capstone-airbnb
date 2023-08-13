@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { Roles } from 'src/enum/roles.enum';
@@ -87,7 +87,7 @@ export class RoomsService {
             })
           }
         } else {
-          throw new BadRequestException({
+          throw new ForbiddenException({
             statusCode: 403,
             message: "You don't have permission to access!",
             dateTime: new Date().toISOString()
