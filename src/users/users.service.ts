@@ -3,6 +3,7 @@ import { BadRequestException, ForbiddenException, HttpException, Injectable, Not
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { check } from 'prettier';
 import { Roles } from 'src/enum/roles.enum';
 
 @Injectable()
@@ -25,13 +26,13 @@ export class UsersService {
   // Create a user
   async createUser(user) {
     try {
-      let { email, pass_word, full_name, birth_day, gender, user_role, phone } = user;
+      let { email, pass_word, full_name, birth_day, gender, phone } = user;
 
       // check email if exists
       let checkEmail = await this.prisma.users.findFirst({
         where: {
-          email,
-        },
+          email
+        }
       });
 
       if (checkEmail) {
@@ -51,12 +52,7 @@ export class UsersService {
           data: newUser,
         });
 
-        return {
-          statusCode: 200,
-          message: 'Create user successfully!',
-          content: newUser,
-          dateTime: new Date().toISOString(),
-        };
+        return responseObject(200, "Create user successfully!", newUser); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -65,7 +61,7 @@ export class UsersService {
 
   // Delete user
   // Only user can delete himself or admin can delete anyone 
-  async deleteUserById(delete_id: number, token: string) {
+  async deleteUserById(delete_id, token) {
     try {
       const decodedToken = await this.jwtService.decode(token); 
       const userId = decodedToken["user_id"]; 
@@ -80,29 +76,17 @@ export class UsersService {
        
       if (checkUser) {
         if (userId === delete_id || userRole === Roles.ADMIN) {
-          return {
-            statusCode: 200,
-            message: "Delete user successfully!",
-            content: await this.prisma.users.delete({
-              where: {
-                user_id: delete_id
-              }
-            }),
-            dateTime: new Date().toISOString()
-          }
+          let deletedUser = await this.prisma.users.delete({
+            where: {
+              user_id: delete_id
+            }
+          }); 
+          return responseObject(200, "Delete user successfully!", deletedUser); 
         } else {
-          throw new ForbiddenException({
-            statusCode: 403,
-            message: "You don't have permission to access!",
-            dateTime: new Date().toISOString()
-          })
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
         }
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: "user not found",
-          dateTime: new Date().toISOString()
-        })
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!")); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status); 
@@ -122,7 +106,7 @@ export class UsersService {
           },
         },
       });
-
+      
       if (keyword) {
         filteredItems = filteredItems.filter((item) =>
           item.full_name.toLowerCase().includes(keyword.toLowerCase()),
@@ -131,27 +115,32 @@ export class UsersService {
 
       let itemSlice = filteredItems.slice(startIndex, endIndex);
 
-      return {
-        statusCode: 200,
-        message: 'Get rooms successfully',
-        content: {
+      if (filteredItems.length > 0) {
+        return responseObject(200, "Get rooms successfully!", {
           pageIndex,
           pageSize,
           totalRow: filteredItems.length,
           keyword: `Name LIKE %${keyword}%`,
-          data: itemSlice,
-        },
-        dateTime: new Date().toISOString(),
-      };
+          data: itemSlice
+        });
+      } else {
+        return responseObject(200, "No matching results found!", {
+          pageIndex,
+          pageSize,
+          totalRow: filteredItems.length,
+          keyword: `Name LIKE %${keyword}%`,
+          data: itemSlice
+        })
+      }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
 
   // Get user by user_id
-  async getUserById(userId: number) {
+  async getUserById(userId) {
     try {
-      let checkUser = await this.prisma.users.findFirst({
+      let checkUser = await this.prisma.users.findUnique({
         where: {
           user_id: userId,
         },
@@ -159,19 +148,9 @@ export class UsersService {
       let data = { ...checkUser, pass_word: '' };
 
       if (checkUser) {
-        return {
-          statusCode: 200,
-          message: 'Get user successfully!',
-          content: data,
-          dateTime: new Date().toISOString(),
-        };
+        return responseObject(200, "Get user successfully!", data); 
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'User not found!',
-          dateTime: new Date().toISOString(),
-        });
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!")); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -189,23 +168,10 @@ export class UsersService {
         },
       });
 
-      // console.log("checkName", checkName)
-
       if (checkName.length > 0) {
-        return {
-          statusCode: 200,
-          message: 'Get users successfully!',
-          total: checkName.length,
-          content: checkName,
-          dateTime: new Date().toISOString()
-        };
+        return responseArray(200, "Get users successfully!", checkName.length, checkName); 
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'User not found!',
-          dateTime: new Date().toISOString(),
-        });
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!")); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -217,16 +183,16 @@ export class UsersService {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken['user_id']; 
-      const userRole = decodedToken['user_role']
-      const { full_name, email, birth_day, gender, user_role, phone } =
-        userUpdate;
+      const userRole = decodedToken['user_role'];
+
+      const { full_name, email, birth_day, gender, phone } = userUpdate;
 
       let newData = {
         full_name,
         email,
         birth_day,
         gender,
-        user_role:userRole,
+        user_role: userRole,
         phone,
       };
 
@@ -237,12 +203,7 @@ export class UsersService {
         data: newData,
       });
 
-      return {
-        statusCode: 200,
-        message: 'Update user successfully!',
-        content: newData,
-        dateTime: new Date().toISOString(),
-      };
+      return responseObject(200, "Update user successfully!", newData); 
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -262,13 +223,8 @@ export class UsersService {
           avatar: file.filename,
         },
       });
-
-      return {
-        statusCode: 200,
-        message: 'Upload avatar successfully!',
-        content: userInfo,
-        dateTime: new Date().toISOString(),
-      };
+      
+      return responseObject(200, "Upload avatar successfully!", userInfo); 
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }

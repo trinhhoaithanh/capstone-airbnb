@@ -1,11 +1,11 @@
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBody, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { FileUploadDto } from './dto/fileUploadDto.dto';
-import { Body, Controller, Delete, Get, Headers, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('Users')
@@ -51,13 +51,13 @@ export class UsersController {
 
   // Get user by user_id
   @Get('get-user-by-id/:user_id')
-  getUserById(@Query('id') userId: number) {
+  getUserById(@Param('user_id') userId: number) {
     return this.usersService.getUserById(+userId);
   }
 
   // Get user by user_name
-  @Get('get-user-by-name/:user_name')
-  getUserByName(@Query('full_name') userName: string) {
+  @Get('get-user-by-name/:full_name')
+  getUserByName(@Param('full_name') userName: string) {
     return this.usersService.getUserByName(userName);
   }
 
