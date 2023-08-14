@@ -29,7 +29,7 @@ export class LocationService {
       const decodedToken = await this.jwtService.decode(token);
       const userRole = decodedToken['user_role'];
 
-      if(userRole === Roles.ADMIN){
+      if (userRole === Roles.ADMIN) {
         const { location_name, province, nation, location_image } = location;
 
         let newLocation = {
@@ -38,22 +38,17 @@ export class LocationService {
           nation,
           location_image,
         };
-  
+
         await this.prisma.location.create({
           data: newLocation,
         });
-  
-        return {
-          statusCode: 201,
-          message: 'Create location successfully',
-          content: newLocation,
-          dateTime: new Date().toISOString(),
-        };
+        
+        return responseObject(201, "Create location successfully!", newLocation); 
       }
       else {
-        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
+        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
       }
-      
+
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }

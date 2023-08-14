@@ -71,36 +71,18 @@ export class RoomsService {
           });
 
           if (checkLocation) {
-            return {
-              statusCode: 201,
-              message: "Create room successfully!",
-              content: await this.prisma.rooms.create({
-                data: newRoom
-              }),
-              dateTime: new Date().toISOString()
-            }
+            let createRoom = await this.prisma.rooms.create({
+              data: newRoom
+            });
+            return responseObject(201, "Create room successfully!", createRoom); 
           } else {
-            throw new NotFoundException({
-              statusCode: 404,
-              message: "Request is invalid",
-              content: "Location not found!",
-              dateTime: new Date().toISOString()
-            })
+            throw new NotFoundException(responseObject(404, "Request is invalid!", "Location not found!")); 
           }
         } else {
-          throw new ForbiddenException({
-            statusCode: 403,
-            message: "You don't have permission to access!",
-            dateTime: new Date().toISOString()
-          })
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
         }
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: "Request is invalid",
-          content: "User not found!",
-          dateTime: new Date().toISOString()
-        })
+        throw new NotFoundException(responseObject(404, "Request is invalid!", "User not found!"));
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
