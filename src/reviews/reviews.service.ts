@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import { Review } from './entities/review.entity';
 import { Roles } from 'src/enum/roles.enum';
+import { responseObject } from 'src/util/response-template';
 
 @Injectable()
 export class ReviewsService {
@@ -207,6 +208,37 @@ export class ReviewsService {
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
+    }
+  }
+
+  //Delete review by review_id
+  async deleteReviewByReviewId(reviewId,token){
+    let decodedToken = await this.jwtService.decode(token)
+    let userRole = decodedToken['user_role']
+
+    if(userRole === Roles.ADMIN){
+      let checkReview = await this.prisma.reviews.findFirst({
+        where:{
+          review_id:reviewId
+        }
+      })
+
+      if(checkReview){
+
+        await this.prisma.reviews.delete({
+          where:{
+            review_id:reviewId
+          }
+        })
+
+      return responseObject(200, "Delete room successfully"); 
+      }
+      else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Review not found!"));
+      }
+    }
+    else {
+      throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
     }
   }
 }

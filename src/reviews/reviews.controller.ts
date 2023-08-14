@@ -7,6 +7,7 @@ import {
   Headers,
   Put,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -62,5 +63,20 @@ export class ReviewsController {
   @Get('get-review-by-room/:room_id')
   getReviewByRoom(@Param('room_id') roomId: Number) {
     return this.reviewsService.getReviewByRoom(+roomId);
+  }
+
+  // Delete review by review_id
+  @ApiParam({
+    name: "review_id",
+    required: true
+  })
+  @ApiHeader({
+    name: 'token',
+    description: 'Your authentication token',
+    required: true,
+  })
+  @Delete('delete-review-by-review-id/:review_id')
+  deleteReviewByReviewId(@Param('review_id') reviewId, @Headers('token') token){
+    return this.reviewsService.deleteReviewByReviewId(Number(reviewId),token)
   }
 }
