@@ -1,6 +1,8 @@
-import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { Roles } from 'src/enum/roles.enum';
+import { responseObject } from 'src/util/response-template';
 
 @Injectable()
 export class LocationService {
@@ -25,27 +27,33 @@ export class LocationService {
   async createLocation(token, location) {
     try {
       const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
+      const userRole = decodedToken['user_role'];
 
-      const { location_name, province, nation, location_image } = location;
+      if(userRole === Roles.ADMIN){
+        const { location_name, province, nation, location_image } = location;
 
-      let newLocation = {
-        location_name,
-        province,
-        nation,
-        location_image,
-      };
-
-      await this.prisma.location.create({
-        data: newLocation,
-      });
-
-      return {
-        statusCode: 201,
-        message: 'Create location successfully',
-        content: newLocation,
-        dateTime: new Date().toISOString(),
-      };
+        let newLocation = {
+          location_name,
+          province,
+          nation,
+          location_image,
+        };
+  
+        await this.prisma.location.create({
+          data: newLocation,
+        });
+  
+        return {
+          statusCode: 201,
+          message: 'Create location successfully',
+          content: newLocation,
+          dateTime: new Date().toISOString(),
+        };
+      }
+      else {
+        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
+      }
+      
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
