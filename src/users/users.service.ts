@@ -76,11 +76,27 @@ export class UsersService {
        
       if (checkUser) {
         if (userId === delete_id || userRole === Roles.ADMIN) {
+          // Delete user_id if exists in reservations model as foreign key
+          await this.prisma.reservations.deleteMany({
+            where: {
+              user_id: delete_id
+            }
+          }); 
+
+          // Delete user_id if exists in reviews model as foreign key
+          await this.prisma.reviews.deleteMany({
+            where: {
+              user_id: delete_id
+            }
+          }); 
+
+          // Delete user_id in users model as primary key
           let deletedUser = await this.prisma.users.delete({
             where: {
               user_id: delete_id
             }
           }); 
+          
           return responseObject(200, "Delete user successfully!", deletedUser); 
         } else {
           throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
