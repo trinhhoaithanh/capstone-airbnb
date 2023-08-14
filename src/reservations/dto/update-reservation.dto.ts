@@ -3,7 +3,7 @@ import { CreateReservationDto } from './create-reservation.dto';
 
 export class UpdateReservationDto extends PartialType(CreateReservationDto) {
     @ApiProperty()
-    room_id: Number;
+    room_id: number;
 
     @ApiProperty()
     start_date: Date
@@ -12,7 +12,7 @@ export class UpdateReservationDto extends PartialType(CreateReservationDto) {
     end_date: Date
 
     @ApiProperty()
-    guest_amount: Number
+    guest_amount: number
 
     // @ApiProperty()
     // user_id: Number

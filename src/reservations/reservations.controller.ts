@@ -12,6 +12,7 @@ import { ReservationsService } from './reservations.service';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Reservation } from './entities/reservation.entity';
+import { CreateReservationDto } from './dto/create-reservation.dto';
 
 @ApiTags('Reservations')
 @Controller('reservations')
@@ -31,7 +32,7 @@ export class ReservationsController {
     required: true,
   })
   @Post('create-reservation')
-  createReservation(@Headers('token') token, @Body() reservation: Reservation) {
+  createReservation(@Headers('token') token, @Body() reservation: CreateReservationDto) {
     return this.reservationsService.createReservation(reservation, token);
   }
 

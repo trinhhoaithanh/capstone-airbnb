@@ -1,3 +1,4 @@
+import { responseObject } from './../util/response-template';
 import { PrismaClient } from '@prisma/client';
 import {
   BadRequestException,
@@ -33,55 +34,29 @@ export class ReservationsService {
       let decodedToken = await this.jwtService.decode(token);
       let userId = decodedToken['user_id'];
 
-      let { room_id, start_date, end_date, guest_amount } = reservation;
+      let { room_id, guest_amount } = reservation;
 
-      let findRoom = await this.prisma.rooms.findFirst({
+      let newReservation = {
+        room_id,
+        start_date: new Date(),
+        end_date: new Date(),
+        guest_amount,
+        user_id: userId
+      }; 
+
+      let findRoom = await this.prisma.rooms.findUnique({
         where: {
-          room_id,
-        },
+          room_id
+        }
       });
 
       if (findRoom) {
-        let findReservation = await this.prisma.reservations.findFirst({
-          where: {
-            room_id,
-          },
-        });
-
-        if (findReservation) {
-          throw new BadRequestException({
-            statusCode: 400,
-            message: 'Request is invalid',
-            content: 'This room is already booked',
-            dateTime: new Date().toISOString(),
-          });
-        } else {
-          let newData = {
-            room_id,
-            start_date: new Date(),
-            end_date: new Date(),
-            guest_amount,
-            user_id: userId,
-          };
-
-          await this.prisma.reservations.create({
-            data: newData,
-          });
-
-          return {
-            statusCode: 201,
-            message: 'Create reservation successfully',
-            content: newData,
-            dateTime: new Date().toISOString(),
-          };
-        }
+        let bookRoom = await this.prisma.reservations.create({
+          data: newReservation
+        }); 
+        return responseObject(201, "Book room successfully!", bookRoom); 
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'Room not found',
-          dateTime: new Date().toISOString(),
-        });
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!")); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
