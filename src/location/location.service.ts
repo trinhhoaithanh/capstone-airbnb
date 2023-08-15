@@ -164,4 +164,38 @@ export class LocationService {
     }
   }
 
+  // Upload image for location
+  async uploadImage(token, locationId, file) {
+    try {
+      const decodedToken = await this.jwtService.decode(token);
+      const userRole = decodedToken['user_role']; 
+
+      let checkLocation = await this.prisma.location.findUnique({
+        where: {
+          location_id: +locationId
+        }
+      }); 
+
+      if (checkLocation) {
+        if (userRole === Roles.ADMIN) {
+          let uploadImg = await this.prisma.location.update({
+            where: {
+              location_id: +locationId
+            },
+            data: {
+              location_image: file.filename 
+            }
+          }); 
+          return responseObject(200, "Upload image successfully!", uploadImg); 
+        } else {
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
+        }
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!")); 
+      }
+    } catch (err) {
+      throw new HttpException(err.response, err.status); 
+    }
+  }
+
 }

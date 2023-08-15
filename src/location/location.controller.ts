@@ -1,8 +1,11 @@
-import { Body, Controller, Get, Headers, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { Location } from './entities/location.entity';
-import { ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { FileUploadLocationDto } from './dto/file-upload.dto';
 
 @ApiTags('Location')
 @Controller('location')
@@ -52,5 +55,28 @@ export class LocationController {
   @Get('get-location-pagination')
   getLocationPagination(@Query('pageIndex') pageIndex:number, @Query('pageSize') pageSize:number, @Query('keyword') keyWord:string){
     return this.locationService.getLocationPagination(pageIndex, pageSize, keyWord)
+  }
+
+  // Upload image for location
+  @ApiHeader({
+    name: "token",
+    description: "Your authentication token", 
+    required: true
+  })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({type: FileUploadLocationDto})
+  @UseInterceptors(FileInterceptor("file", {
+    storage: diskStorage({
+      destination: process.cwd() + "/public/img",
+      filename: (req, file, callback) => callback(null, new Date().getTime() + file.originalname)
+    })
+  }))
+  @Post("upload-image")
+  uploadImage(
+    @Headers("token") token,
+    @Query("location_id") locationId: number, 
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    return this.locationService.uploadImage(token, locationId, file); 
   }
 }
