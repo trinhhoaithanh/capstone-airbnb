@@ -90,4 +90,42 @@ export class LocationService {
     }
     
   }
+
+  // Get location by pagination
+  async getLocationPagination(pageIndex, pageSize, keyWord){
+    try {
+      const startIndex = (pageIndex - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+
+      let filteredItems = await this.prisma.location.findMany({
+        where: {
+          location_name: {
+            contains: keyWord,
+          },
+        },
+      });
+
+      if (keyWord) {
+        filteredItems = filteredItems.filter((item) =>
+          item.location_name.toLowerCase().includes(keyWord.toLowerCase()),
+        );
+      }
+
+      const itemSlice = filteredItems.slice(startIndex, endIndex);
+      return {
+        statusCode: 200,
+        message: 'Get locations successfully',
+        content: {
+          pageIndex,
+          pageSize,
+          totalRow: filteredItems.length,
+          keyword: `Location name LIKE %${keyWord}%`,
+          data: itemSlice,
+        },
+        dateTime: new Date().toISOString(),
+      };
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
+    }
+  }
 }
