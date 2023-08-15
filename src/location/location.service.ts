@@ -82,64 +82,50 @@ export class LocationService {
     }
     catch(err){
       throw new HttpException(err.response, err.status);
-    }
-    
+    } 
   }
 
   // Update location by location_id
   async updateLocation(token, locationId, updateLocation) {
-    // try {
-    const decodedToken = await this.jwtService.decode(token);
-    const userId = decodedToken["user_id"];
-    const userRole = decodedToken["user_role"];
+    try {
+      const decodedToken = await this.jwtService.decode(token);
+      const userRole = decodedToken["user_role"];
 
-    let { location_name, province, nation, location_image } = updateLocation;
+      let { location_name, province, nation, location_image } = updateLocation;
 
-    let newLocation = {
-      location_name,
-      province,
-      nation,
-      location_image
-    };
+      let newLocation = {
+        location_name,
+        province,
+        nation,
+        location_image
+      };
 
-    let checkUser = await this.prisma.users.findUnique({
-      where: {
-        user_id: +userId
-      }
-    });
-
-    if (checkUser) {
       if (userRole === Roles.ADMIN) {
         let checkLocation = await this.prisma.location.findUnique({
           where: {
             location_id: +locationId
           }
         });
-
         if (checkLocation) {
-          let updateLocation = await this.prisma.location.update({
+          const newUpdate = await this.prisma.location.update({
             where: {
               location_id: +locationId
             },
             data: newLocation
           });
-
-          return responseObject(200, "Update location successfully!", updateLocation);
+          return responseObject(200, "Update location successfully!", newUpdate);
         } else {
           throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));
         }
       } else {
         throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
       }
-    } else {
-      throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!"));
+    } 
+    catch (err) {
+      throw new HttpException(err.response, err.status);
     }
-    // catch(err){
-    //   throw new HttpException(err.response, err.status);
-    // }
   }
-    
-      
+        
   // Get location by pagination
   async getLocationPagination(pageIndex, pageSize, keyWord){
     try {
