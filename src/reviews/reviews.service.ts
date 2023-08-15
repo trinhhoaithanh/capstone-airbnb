@@ -213,7 +213,8 @@ export class ReviewsService {
 
   //Delete review by review_id
   async deleteReviewByReviewId(reviewId,token){
-    let decodedToken = await this.jwtService.decode(token)
+    try{
+      let decodedToken = await this.jwtService.decode(token)
     let userRole = decodedToken['user_role']
 
     if(userRole === Roles.ADMIN){
@@ -239,6 +240,10 @@ export class ReviewsService {
     }
     else {
       throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
+    }
+    }
+    catch(err){
+      throw new HttpException(err.response, err.status);
     }
   }
 }

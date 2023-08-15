@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Put, Query } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { Location } from './entities/location.entity';
 import { ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -46,5 +46,10 @@ export class LocationController {
     @Body() updateLocation: UpdateLocationDto
   ) {
     return this.locationService.updateLocation(token, locationId, updateLocation); 
+  }
+  // Pagination of location
+  @Get('get-location-pagination')
+  getLocationPagination(@Query('pageIndex') pageIndex:number, @Query('pageSize') pageSize:number, @Query('keyword') keyWord:string){
+    return this.locationService.getLocationPagination(pageIndex, pageSize, keyWord)
   }
 }

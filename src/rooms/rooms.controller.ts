@@ -81,7 +81,7 @@ export class RoomsController {
     return this.roomsService.deleteRoomByRoomId(Number(roomId),token)
   }
 
-  // Upload user's avatar
+  // Upload room's image
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: FileUploadDto })
   @UseInterceptors(
@@ -106,6 +106,6 @@ export class RoomsController {
     @UploadedFile() file: Express.Multer.File,
     @Headers('token') token,
   ) {
-    return this.roomsService.uploadRoomImg(token, file,roomId);
+    return this.roomsService.uploadRoomImg(token, file,Number(roomId));
   }
 }
