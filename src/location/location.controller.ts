@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { LocationService } from './location.service';
 import { Location } from './entities/location.entity';
 import { ApiBody, ApiConsumes, ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -78,5 +78,19 @@ export class LocationController {
     @UploadedFile() file: Express.Multer.File
   ) {
     return this.locationService.uploadImage(token, locationId, file); 
+  }
+
+  // Delete location
+  @ApiHeader({
+    name: "token",
+    description: "Your authentication token", 
+    required: true
+  })
+  @Delete("delete-location/:location_id")
+  deleteLocation(
+    @Headers("token") token, 
+    @Param("location_id") locationId: number
+  ) {
+    return this.locationService.deleteLocation(token, locationId); 
   }
 }

@@ -1,3 +1,4 @@
+import { responseArray } from './../util/response-template';
 import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
@@ -187,6 +188,52 @@ export class LocationService {
             }
           }); 
           return responseObject(200, "Upload image successfully!", uploadImg); 
+        } else {
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
+        }
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!")); 
+      }
+    } catch (err) {
+      throw new HttpException(err.response, err.status); 
+    }
+  }
+
+  // Delete location
+  async deleteLocation(token, locationId) {
+    try {
+      const decodedToken = await this.jwtService.decode(token); 
+      const userRole = decodedToken['user_role']; 
+
+      let checkLocation = await this.prisma.location.findUnique({
+        where: {
+          location_id: +locationId
+        }
+      }); 
+
+      if (checkLocation) {
+        if (userRole === Roles.ADMIN) {
+          // Delete location_id if exists in rooms model as foreign key 
+          let checkLocationRoom = await this.prisma.rooms.findFirst({
+            where: {
+              location_id: +locationId
+            }
+          }); 
+          if (checkLocationRoom) {
+            await this.prisma.rooms.deleteMany({
+              where: {
+                location_id: +locationId
+              }
+            }); 
+
+            // Delete location_id in location model as primary key 
+            const deletedLocation = await this.prisma.location.delete({
+              where: {
+                location_id: +locationId
+              }
+            }); 
+            return responseObject(200, "Delete location successfully!", deletedLocation); 
+          }
         } else {
           throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
         }
