@@ -47,6 +47,7 @@ export class LocationController {
   ) {
     return this.locationService.updateLocation(token, locationId, updateLocation); 
   }
+  
   // Pagination of location
   @Get('get-location-pagination')
   getLocationPagination(@Query('pageIndex') pageIndex:number, @Query('pageSize') pageSize:number, @Query('keyword') keyWord:string){
