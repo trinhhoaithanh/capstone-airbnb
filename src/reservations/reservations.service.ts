@@ -1,38 +1,27 @@
-import { responseObject } from './../util/response-template';
+import { responseArray, responseObject } from './../util/response-template';
 import { PrismaClient } from '@prisma/client';
-import {
-  BadRequestException,
-  ForbiddenException,
-  HttpException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class ReservationsService {
   prisma = new PrismaClient();
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) { }
 
   // Get reservations
   async getReservation() {
     try {
-      return {
-        statusCode: 200,
-        message: 'Get all reservations successfully!',
-        content: await this.prisma.reservations.findMany(),
-        dateTime: new Date().toISOString(),
-      };
+      const reservations = await this.prisma.reservations.findMany(); 
+      return responseArray(200, 'Get all reservations successfully!', reservations.length, reservations); 
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
 
   // Create reservation
-  async createReservation(reservation, token) {
+  async createReservation(token, reservation) {
     try {
-      let decodedToken = await this.jwtService.decode(token);
-      let userId = decodedToken['user_id'];
+      const userId = await this.jwtService.decode(token)['user_id'];
 
       let { room_id, guest_amount } = reservation;
 
@@ -42,21 +31,31 @@ export class ReservationsService {
         end_date: new Date(),
         guest_amount,
         user_id: userId
-      }; 
+      };
 
-      let findRoom = await this.prisma.rooms.findUnique({
+      let checkUser = await this.prisma.users.findUnique({
         where: {
-          room_id
+          user_id: userId
         }
       });
 
-      if (findRoom) {
-        let bookRoom = await this.prisma.reservations.create({
-          data: newReservation
-        }); 
-        return responseObject(201, "Book room successfully!", bookRoom); 
+      if (checkUser) {
+        let findRoom = await this.prisma.rooms.findUnique({
+          where: {
+            room_id
+          }
+        });
+
+        if (findRoom) {
+          let bookRoom = await this.prisma.reservations.create({
+            data: newReservation
+          });
+          return responseObject(201, "Book room successfully!", bookRoom);
+        } else {
+          throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
+        }
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!")); 
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!"));
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -98,18 +97,18 @@ export class ReservationsService {
 
 
       let checkUser = await this.prisma.users.findFirst({
-        where:{
-          user_id:userId
+        where: {
+          user_id: userId
         }
       })
 
-      if(checkUser){
+      if (checkUser) {
         let checkReservation = await this.prisma.reservations.findMany({
           where: {
             user_id: userId,
           },
         });
-  
+
         if (checkReservation.length > 0) {
           return {
             statusCode: 200,
@@ -126,11 +125,11 @@ export class ReservationsService {
           });
         }
       }
-      else{
-        throw new NotFoundException(responseObject(404,"Request is invalid", "User not found"))
+      else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found"))
       }
 
-      
+
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -139,72 +138,72 @@ export class ReservationsService {
   // Update reservation
   async updateReservation(reservationId, token, reservationUpdate) {
     // try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
+    const decodedToken = await this.jwtService.decode(token);
+    const userId = decodedToken['user_id'];
 
-      const { room_id, start_date, end_date, guest_amount } = reservationUpdate;
+    const { room_id, start_date, end_date, guest_amount } = reservationUpdate;
 
-      let newData = {
-        room_id,
-        start_date,
-        end_date,
-        guest_amount,
-      };
+    let newData = {
+      room_id,
+      start_date,
+      end_date,
+      guest_amount,
+    };
 
-      let checkReservation = await this.prisma.reservations.findFirst({
+    let checkReservation = await this.prisma.reservations.findFirst({
+      where: {
+        reservation_id: Number(reservationId),
+      },
+    });
+
+    // Check if reservation_id exists in reservations table
+    if (checkReservation) {
+      let checkUser = await this.prisma.reservations.findFirst({
         where: {
-          reservation_id: Number(reservationId),
+          user_id: userId,
         },
       });
 
-      // Check if reservation_id exists in reservations table
-      if (checkReservation) {
-        let checkUser = await this.prisma.reservations.findFirst({
+      // Check if user_id matches that reservation_id
+      if (checkUser) {
+        let checkRoom = await this.prisma.rooms.findFirst({
           where: {
-            user_id: userId,
-          },
-        });
-
-        // Check if user_id matches that reservation_id
-        if (checkUser) {
-          let checkRoom = await this.prisma.rooms.findFirst({
-            where:{
-              room_id
-            }
-          })
-          if(checkRoom){
-            return {
-              statusCode: 200,
-              message: 'Update reservation successfully!',
-              content: await this.prisma.reservations.update({
-                where: {
-                  reservation_id: Number(reservationId),
-                },
-                data: newData,
-              }),
-              dateTime: new Date().toISOString(),
-            };
+            room_id
           }
-          else{
-            throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found"))
-          }
-          
-        } else {
-          throw new ForbiddenException({
-            statusCode: 403,
-            message: 'Request is invalid',
-            content: 'You are not allowed to update this',
+        })
+        if (checkRoom) {
+          return {
+            statusCode: 200,
+            message: 'Update reservation successfully!',
+            content: await this.prisma.reservations.update({
+              where: {
+                reservation_id: Number(reservationId),
+              },
+              data: newData,
+            }),
             dateTime: new Date().toISOString(),
-          });
+          };
         }
+        else {
+          throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found"))
+        }
+
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
+        throw new ForbiddenException({
+          statusCode: 403,
           message: 'Request is invalid',
-          content: 'Reservation not found',
+          content: 'You are not allowed to update this',
           dateTime: new Date().toISOString(),
         });
       }
+    } else {
+      throw new NotFoundException({
+        statusCode: 404,
+        message: 'Request is invalid',
+        content: 'Reservation not found',
+        dateTime: new Date().toISOString(),
+      });
+    }
     // } catch (err) {
     //   throw new HttpException(err.response, err.status);
     // }

@@ -8,17 +8,13 @@ import { responseObject } from 'src/util/response-template';
 @Injectable()
 export class LocationService {
   prisma = new PrismaClient();
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) { }
 
   // Get locations
   async getLocations() {
     try {
-      return {
-        statusCode: 200,
-        message: 'Get locations successfully!',
-        content: await this.prisma.location.findMany(),
-        dateTime: new Date().toISOString(),
-      };
+      const locations = await this.prisma.location.findMany(); 
+      return responseArray(200, 'Get locations successfully!', locations.length, locations); 
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -27,9 +23,8 @@ export class LocationService {
   // Create location
   async createLocation(token, location) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userRole = decodedToken['user_role'];
-
+      const userRole = await this.jwtService.decode(token)['user_role']; 
+       
       if (userRole === Roles.ADMIN) {
         const { location_name, province, nation, location_image } = location;
 
@@ -43,28 +38,27 @@ export class LocationService {
         await this.prisma.location.create({
           data: newLocation,
         });
-        
-        return responseObject(201, "Create location successfully!", newLocation); 
+
+        return responseObject(201, "Create location successfully!", newLocation);
       }
       else {
         throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
       }
-
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
 
   // Get location by location_id
-  async getLocationByLocationId(locationId){
-    try{
+  async getLocationByLocationId(locationId) {
+    try {
       let checkLocation = await this.prisma.location.findFirst({
-        where:{
-          location_id:locationId
+        where: {
+          location_id: locationId
         }
       })
-  
-      if(checkLocation){
+
+      if (checkLocation) {
         return {
           statusCode: 200,
           message: 'Get location successfully!',
@@ -72,7 +66,7 @@ export class LocationService {
           dateTime: new Date().toISOString(),
         };
       }
-      else{
+      else {
         throw new NotFoundException({
           statusCode: 404,
           message: 'Request is invalid',
@@ -81,9 +75,9 @@ export class LocationService {
         });
       }
     }
-    catch(err){
+    catch (err) {
       throw new HttpException(err.response, err.status);
-    } 
+    }
   }
 
   // Update location by location_id
@@ -121,14 +115,14 @@ export class LocationService {
       } else {
         throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
       }
-    } 
+    }
     catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
-        
+
   // Get location by pagination
-  async getLocationPagination(pageIndex, pageSize, keyWord){
+  async getLocationPagination(pageIndex, pageSize, keyWord) {
     try {
       const startIndex = (pageIndex - 1) * pageSize;
       const endIndex = startIndex + pageSize;
@@ -169,13 +163,13 @@ export class LocationService {
   async uploadImage(token, locationId, file) {
     try {
       const decodedToken = await this.jwtService.decode(token);
-      const userRole = decodedToken['user_role']; 
+      const userRole = decodedToken['user_role'];
 
       let checkLocation = await this.prisma.location.findUnique({
         where: {
           location_id: +locationId
         }
-      }); 
+      });
 
       if (checkLocation) {
         if (userRole === Roles.ADMIN) {
@@ -184,32 +178,32 @@ export class LocationService {
               location_id: +locationId
             },
             data: {
-              location_image: file.filename 
+              location_image: file.filename
             }
-          }); 
-          return responseObject(200, "Upload image successfully!", uploadImg); 
+          });
+          return responseObject(200, "Upload image successfully!", uploadImg);
         } else {
-          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
         }
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!")); 
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));
       }
     } catch (err) {
-      throw new HttpException(err.response, err.status); 
+      throw new HttpException(err.response, err.status);
     }
   }
 
   // Delete location
   async deleteLocation(token, locationId) {
     try {
-      const decodedToken = await this.jwtService.decode(token); 
-      const userRole = decodedToken['user_role']; 
+      const decodedToken = await this.jwtService.decode(token);
+      const userRole = decodedToken['user_role'];
 
       let checkLocation = await this.prisma.location.findUnique({
         where: {
           location_id: +locationId
         }
-      }); 
+      });
 
       if (checkLocation) {
         if (userRole === Roles.ADMIN) {
@@ -218,30 +212,30 @@ export class LocationService {
             where: {
               location_id: +locationId
             }
-          }); 
+          });
           if (checkLocationRoom) {
             await this.prisma.rooms.deleteMany({
               where: {
                 location_id: +locationId
               }
-            }); 
+            });
 
             // Delete location_id in location model as primary key 
             const deletedLocation = await this.prisma.location.delete({
               where: {
                 location_id: +locationId
               }
-            }); 
-            return responseObject(200, "Delete location successfully!", deletedLocation); 
+            });
+            return responseObject(200, "Delete location successfully!", deletedLocation);
           }
         } else {
-          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
         }
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!")); 
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));
       }
     } catch (err) {
-      throw new HttpException(err.response, err.status); 
+      throw new HttpException(err.response, err.status);
     }
   }
 

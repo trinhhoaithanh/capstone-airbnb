@@ -12,7 +12,7 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   prisma = new PrismaClient();
 
@@ -20,7 +20,7 @@ export class AuthService {
   async signUp(userSignup) {
     try {
       let { email, pass_word, full_name, birth_day, gender, phone } = userSignup;
-        
+
       // Check email if exists
       let checkEmail = await this.prisma.users.findFirst({
         where: {
@@ -29,7 +29,7 @@ export class AuthService {
       });
 
       if (checkEmail) {
-        throw new BadRequestException(responseObject(400, "Request is invalid", "Email already existed!")); 
+        throw new BadRequestException(responseObject(400, "Request is invalid", "Email already existed!"));
       } else {
         let newUser = {
           email,
@@ -45,7 +45,7 @@ export class AuthService {
           data: newUser,
         });
 
-        return responseObject(200, "Signup successfully!", newUser); 
+        return responseObject(200, "Signup successfully!", newUser);
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -55,7 +55,7 @@ export class AuthService {
   // Signup for Admin
   async createAdmin(adminSignup) {
     try {
-      const {email, pass_word, full_name, birth_day, gender, phone} = adminSignup;
+      const { email, pass_word, full_name, birth_day, gender, phone } = adminSignup;
 
       // Check email if exists
       let checkEmail = await this.prisma.users.findFirst({
@@ -65,7 +65,7 @@ export class AuthService {
       });
 
       if (checkEmail) {
-        throw new BadRequestException(responseObject(400, "Request is invalid", "Email already existed!")); 
+        throw new BadRequestException(responseObject(400, "Request is invalid", "Email already existed!"));
       } else {
         let newUser = {
           email,
@@ -81,10 +81,10 @@ export class AuthService {
           data: newUser,
         });
 
-        return responseObject(200, "Signup successfully!", newUser); 
+        return responseObject(200, "Signup successfully!", newUser);
       }
     } catch (err) {
-      throw new HttpException(err.response, err.status); 
+      throw new HttpException(err.response, err.status);
     }
   }
 
@@ -109,12 +109,12 @@ export class AuthService {
             { secret: this.configService.get('KEY'), expiresIn: '60m' },
           );
 
-          return responseObject(200, "Login successfully!", {userLogin: checkUser, token: tokenGenerate}); 
+          return responseObject(200, "Login successfully!", { userLogin: checkUser, token: tokenGenerate });
         } else {
-          throw new BadRequestException(responseObject(400, "Request is invalid", "Password is incorrect!")); 
+          throw new BadRequestException(responseObject(400, "Request is invalid", "Password is incorrect!"));
         }
       } else {
-        throw new BadRequestException(responseObject(400, "Request is invalid", "Email or password is incorrect!")); 
+        throw new BadRequestException(responseObject(400, "Request is invalid", "Email or password is incorrect!"));
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);

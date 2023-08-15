@@ -1,26 +1,16 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Headers,
-  Param,
-  Post,
-  Put
-} from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Reservation } from './entities/reservation.entity';
 import { CreateReservationDto } from './dto/create-reservation.dto';
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put } from '@nestjs/common';
 
 @ApiTags('Reservations')
-@Controller('reservations')
+@Controller('api/reservations')
 export class ReservationsController {
-  constructor(private readonly reservationsService: ReservationsService) {}
+  constructor(private readonly reservationsService: ReservationsService) { }
 
   // Get reservations
-  @Get('get-reservations')
+  @Get()
   getReservation() {
     return this.reservationsService.getReservation();
   }
@@ -31,9 +21,9 @@ export class ReservationsController {
     description: 'Your authentication token',
     required: true,
   })
-  @Post('create-reservation')
+  @Post()
   createReservation(@Headers('token') token, @Body() reservation: CreateReservationDto) {
-    return this.reservationsService.createReservation(reservation, token);
+    return this.reservationsService.createReservation(token, reservation);
   }
 
   // Get reservation by reservation_id
@@ -44,9 +34,9 @@ export class ReservationsController {
   }
 
   // Get reservation by user_id
-  @ApiParam({name:'user_id'})
+  @ApiParam({ name: 'user_id' })
   @Get('get-reservation-by-user-id/:user_id')
-  getReservationByUserId(@Param('user_id') userId:number) {
+  getReservationByUserId(@Param('user_id') userId: number) {
     return this.reservationsService.getReservationByUserId(Number(userId));
   }
 
@@ -79,7 +69,7 @@ export class ReservationsController {
     required: true,
   })
   @Delete('delete-reservation-by-reservation-id/:reservation_id')
-  deleteReservationByReservationId(@Param('reservation_id') reservationId:number) {
+  deleteReservationByReservationId(@Param('reservation_id') reservationId: number) {
     return this.reservationsService.deleteReservationByReservationId(
       Number(reservationId),
     );

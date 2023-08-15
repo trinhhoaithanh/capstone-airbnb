@@ -8,18 +8,18 @@ import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, Upload
 import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('Users')
-@Controller('users')
+@Controller('api/users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   // Get users
-  @Get('get-users')
+  @Get()
   getUsers() {
     return this.usersService.getUsers();
   }
 
   // Create a user
-  @Post('create-user')
+  @Post()
   createUser(@Body() user: CreateUserDto) {
     return this.usersService.createUser(user);
   }

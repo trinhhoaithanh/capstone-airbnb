@@ -1,28 +1,29 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Headers,
-  Put,
-  Query,
-  Delete,
-} from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Review } from './entities/review.entity';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put } from '@nestjs/common';
+import { CreateReviewDto } from './dto/create-review.dto';
 
 @ApiTags('Reviews')
-@Controller('reviews')
+@Controller('api/reviews')
 export class ReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) {}
+  constructor(private readonly reviewsService: ReviewsService) { }
 
   // Get reviews
-  @Get('get-reviews')
+  @Get()
   getReviews() {
     return this.reviewsService.getReviews();
+  }
+
+  // Create review
+  @ApiHeader({
+    name: 'token',
+    description: 'Your authentication token',
+    required: true,
+  })
+  @Post()
+  createReview(@Headers('token') token, @Body() newReview: CreateReviewDto) {
+    return this.reviewsService.createReview(token, newReview);
   }
 
   // Update review
@@ -35,24 +36,13 @@ export class ReviewsController {
   updateReview(
     @Headers('token') token,
     @Param('review_id') review_id: number,
-    @Body() reviewUpdate:UpdateReviewDto,
+    @Body() reviewUpdate: UpdateReviewDto,
   ) {
     return this.reviewsService.updateReview(
       token,
       Number(review_id),
       reviewUpdate,
     );
-  }
-
-  // Create review
-  @ApiHeader({
-    name: 'token',
-    description: 'Your authentication token',
-    required: true,
-  })
-  @Post('create-review')
-  createReview(@Headers('token') token, @Body() newReview: Review) {
-    return this.reviewsService.createReview(token, newReview);
   }
 
   // Get reviews by room_id
@@ -76,7 +66,7 @@ export class ReviewsController {
     required: true,
   })
   @Delete('delete-review-by-review-id/:review_id')
-  deleteReviewByReviewId(@Param('review_id') reviewId, @Headers('token') token){
-    return this.reviewsService.deleteReviewByReviewId(Number(reviewId),token)
+  deleteReviewByReviewId(@Param('review_id') reviewId, @Headers('token') token) {
+    return this.reviewsService.deleteReviewByReviewId(Number(reviewId), token)
   }
 }
