@@ -103,25 +103,32 @@ export class RoomsService {
         },
       });
 
-      if (keyword) {
-        filteredItems = filteredItems.filter((item) =>
-          item.room_name.toLowerCase().includes(keyword.toLowerCase()),
-        );
+      if(filteredItems.length > 0){
+        if (keyword) {
+          filteredItems = filteredItems.filter((item) =>
+            item.room_name.toLowerCase().includes(keyword.toLowerCase()),
+          );
+        }
+  
+        const itemSlice = filteredItems.slice(startIndex, endIndex);
+        
+        return {
+          statusCode: 200,
+          message: 'Get rooms successfully',
+          content: {
+            pageIndex,
+            pageSize,
+            totalRow: filteredItems.length,
+            keyword: `Room name LIKE %${keyword}%`,
+            data: itemSlice,
+          },
+          dateTime: new Date().toISOString(),
+        };
       }
-
-      const itemSlice = filteredItems.slice(startIndex, endIndex);
-      return {
-        statusCode: 200,
-        message: 'Get rooms successfully',
-        content: {
-          pageIndex,
-          pageSize,
-          totalRow: filteredItems.length,
-          keyword: `Room name LIKE %${keyword}%`,
-          data: itemSlice,
-        },
-        dateTime: new Date().toISOString(),
-      };
+      else{
+        return responseObject(200,"No keyword matching!",filteredItems)
+      }
+      
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }

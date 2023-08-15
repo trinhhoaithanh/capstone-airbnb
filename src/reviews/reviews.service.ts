@@ -40,7 +40,6 @@ export class ReviewsService {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken['user_id'];
-      const userRole = decodedToken['user_role']
 
       let checkReview = await this.prisma.reviews.findUnique({
         where:{
@@ -49,7 +48,7 @@ export class ReviewsService {
       })
 
       if(checkReview){
-        if(checkReview.user_id===userId || userRole === Roles.ADMIN){
+        if(checkReview.user_id===userId){
           let {  user_id, review_date, content, rating } =
           reviewUpdate;
   
@@ -159,7 +158,7 @@ export class ReviewsService {
           },
         });
 
-        if (checkRoomInReview) {
+        if (checkRoomInReview.length > 0) {
           let data = await this.prisma.reviews.findMany({
             where: {
               room_id: roomId,

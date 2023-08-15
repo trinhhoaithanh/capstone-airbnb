@@ -44,14 +44,10 @@ export class ReservationsController {
   }
 
   // Get reservation by user_id
-  @ApiHeader({
-    name: 'token',
-    description: 'Your authentication token',
-    required: true,
-  })
+  @ApiParam({name:'user_id'})
   @Get('get-reservation-by-user-id/:user_id')
-  getReservationByUserId(@Headers('token') token) {
-    return this.reservationsService.getReservationByUserId(token);
+  getReservationByUserId(@Param('user_id') userId:number) {
+    return this.reservationsService.getReservationByUserId(Number(userId));
   }
 
   // Update reservation
@@ -83,7 +79,7 @@ export class ReservationsController {
     required: true,
   })
   @Delete('delete-reservation-by-reservation-id/:reservation_id')
-  deleteReservationByReservationId(@Param('reservation_id') reservationId) {
+  deleteReservationByReservationId(@Param('reservation_id') reservationId:number) {
     return this.reservationsService.deleteReservationByReservationId(
       Number(reservationId),
     );

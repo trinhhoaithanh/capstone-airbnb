@@ -93,32 +93,44 @@ export class ReservationsService {
   }
 
   // Get reservation by user_id
-  async getReservationByUserId(token) {
+  async getReservationByUserId(userId) {
     try {
-      let decodedToken = await this.jwtService.decode(token);
-      let userId = decodedToken['user_id'];
 
-      let checkReservation = await this.prisma.reservations.findMany({
-        where: {
-          user_id: userId,
-        },
-      });
 
-      if (checkReservation.length > 0) {
-        return {
-          statusCode: 200,
-          message: 'Get reservations successfully!',
-          content: checkReservation,
-          dateTime: new Date().toISOString(),
-        };
-      } else {
-        throw new NotFoundException({
-          statusCode: 400,
-          message: 'Request is invalid',
-          content: 'This user has not reserved any room yet',
-          dateTime: new Date().toISOString(),
+      let checkUser = await this.prisma.users.findFirst({
+        where:{
+          user_id:userId
+        }
+      })
+
+      if(checkUser){
+        let checkReservation = await this.prisma.reservations.findMany({
+          where: {
+            user_id: userId,
+          },
         });
+  
+        if (checkReservation.length > 0) {
+          return {
+            statusCode: 200,
+            message: 'Get reservations successfully!',
+            content: checkReservation,
+            dateTime: new Date().toISOString(),
+          };
+        } else {
+          throw new NotFoundException({
+            statusCode: 400,
+            message: 'Request is invalid',
+            content: 'This user has not reserved any room yet',
+            dateTime: new Date().toISOString(),
+          });
+        }
       }
+      else{
+        throw new NotFoundException(responseObject(404,"Request is invalid", "User not found"))
+      }
+
+      
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -126,7 +138,7 @@ export class ReservationsService {
 
   // Update reservation
   async updateReservation(reservationId, token, reservationUpdate) {
-    try {
+    // try {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken['user_id'];
 
@@ -141,7 +153,7 @@ export class ReservationsService {
 
       let checkReservation = await this.prisma.reservations.findFirst({
         where: {
-          reservation_id: reservationId,
+          reservation_id: Number(reservationId),
         },
       });
 
@@ -155,17 +167,28 @@ export class ReservationsService {
 
         // Check if user_id matches that reservation_id
         if (checkUser) {
-          return {
-            statusCode: 200,
-            message: 'Update reservation successfully!',
-            content: await this.prisma.reservations.update({
-              where: {
-                reservation_id: reservationId,
-              },
-              data: newData,
-            }),
-            dateTime: new Date().toISOString(),
-          };
+          let checkRoom = await this.prisma.rooms.findFirst({
+            where:{
+              room_id
+            }
+          })
+          if(checkRoom){
+            return {
+              statusCode: 200,
+              message: 'Update reservation successfully!',
+              content: await this.prisma.reservations.update({
+                where: {
+                  reservation_id: Number(reservationId),
+                },
+                data: newData,
+              }),
+              dateTime: new Date().toISOString(),
+            };
+          }
+          else{
+            throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found"))
+          }
+          
         } else {
           throw new ForbiddenException({
             statusCode: 403,
@@ -182,9 +205,9 @@ export class ReservationsService {
           dateTime: new Date().toISOString(),
         });
       }
-    } catch (err) {
-      throw new HttpException(err.response, err.status);
-    }
+    // } catch (err) {
+    //   throw new HttpException(err.response, err.status);
+    // }
   }
 
   // Delete reservation by reservation id
