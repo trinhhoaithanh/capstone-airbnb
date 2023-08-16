@@ -1,6 +1,6 @@
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBody, ApiConsumes, ApiHeader, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { FileUploadDto } from './dto/fileUploadDto.dto';
@@ -24,22 +24,22 @@ export class UsersController {
     return this.usersService.createUser(user);
   }
 
-  // Delete user by id
+  // Delete user by user_id
   @ApiHeader({
     name: 'token',
     description: 'Your authentication token',
     required: true,
   })
-  @Delete('delete-user-by-id')
+  @Delete()
   deleteUserById(
-    @Query('id') delete_id: Number,
+    @Query('id') deleteId: number,
     @Headers("token") token
   ) {
-    return this.usersService.deleteUserById(+delete_id, token);
+    return this.usersService.deleteUserById(+deleteId, token);
   }
 
   // Pagination of users
-  @Get('get-users-by-pagination')
+  @Get('pagination')
   getUsersByPagination(
     @Query('pageIndex') pageIndex: number,
     @Query('pageSize') pageSize: number,
@@ -49,13 +49,13 @@ export class UsersController {
   }
 
   // Get user by user_id
-  @Get('get-user-by-id/:user_id')
-  getUserById(@Param('user_id') userId: number) {
+  @Get(':id')
+  getUserById(@Param('id') userId: number) {
     return this.usersService.getUserById(+userId);
   }
 
   // Get user by user_name
-  @Get('get-user-by-name/:full_name')
+  @Get('search/:full_name')
   getUserByName(@Param('full_name') userName: string) {
     return this.usersService.getUserByName(userName);
   }
@@ -66,7 +66,7 @@ export class UsersController {
     description: 'Your authentication token',
     required: true,
   })
-  @Put('update-user')
+  @Put('update')
   updateUser(@Headers('token') token, @Body() userUpdate: UpdateUserDto) {
     return this.usersService.updateUser(token, userUpdate);
   }

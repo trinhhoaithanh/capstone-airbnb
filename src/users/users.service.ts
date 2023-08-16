@@ -58,9 +58,9 @@ export class UsersService {
     }
   }
 
-  // Delete user
+  // Delete user by user_id
   // Only user can delete himself or admin can delete anyone 
-  async deleteUserById(delete_id, token) {
+  async deleteUserById(deleteId, token) {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken["user_id"];
@@ -69,30 +69,30 @@ export class UsersService {
       // Check the existence of the user to delete 
       let checkUser = await this.prisma.users.findUnique({
         where: {
-          user_id: delete_id
+          user_id: deleteId
         }
       });
 
       if (checkUser) {
-        if (userId === delete_id || userRole === Roles.ADMIN) {
+        if (userId === deleteId || userRole === Roles.ADMIN) {
           // Delete user_id if exists in reservations model as foreign key
           await this.prisma.reservations.deleteMany({
             where: {
-              user_id: delete_id
+              user_id: deleteId
             }
           });
 
           // Delete user_id if exists in reviews model as foreign key
           await this.prisma.reviews.deleteMany({
             where: {
-              user_id: delete_id
+              user_id: deleteId
             }
           });
 
           // Delete user_id in users model as primary key
           let deletedUser = await this.prisma.users.delete({
             where: {
-              user_id: delete_id
+              user_id: deleteId
             }
           });
 
@@ -131,7 +131,7 @@ export class UsersService {
       let itemSlice = filteredItems.slice(startIndex, endIndex);
 
       if (filteredItems.length > 0) {
-        return responseObject(200, "Get rooms successfully!", {
+        return responseObject(200, "Get users successfully!", {
           pageIndex,
           pageSize,
           totalRow: filteredItems.length,
@@ -186,7 +186,7 @@ export class UsersService {
       if (checkName.length > 0) {
         return responseArray(200, "Get users successfully!", checkName.length, checkName);
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!"));
+        return responseObject(200, "No matching results found!", checkName);
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -211,14 +211,24 @@ export class UsersService {
         phone,
       };
 
-      await this.prisma.users.update({
+      let checkUser = await this.prisma.users.findUnique({
         where: {
-          user_id: userId,
-        },
-        data: newData,
-      });
+          user_id: userId
+        }
+      }); 
 
-      return responseObject(200, "Update user successfully!", newData);
+      if (checkUser) {
+        const update = await this.prisma.users.update({
+          where: {
+            user_id: userId
+          },
+          data: newData
+        });
+
+        return responseObject(200, "Update user successfully!", update);
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!"));
+      }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -230,16 +240,26 @@ export class UsersService {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken['user_id'];
 
-      let userInfo = await this.prisma.users.update({
+      let checkUser = await this.prisma.users.findUnique({
         where: {
-          user_id: userId,
-        },
-        data: {
-          avatar: file.filename,
-        },
-      });
+          user_id: userId
+        }
+      }); 
 
-      return responseObject(200, "Upload avatar successfully!", userInfo);
+      if (checkUser) {
+        let userInfo = await this.prisma.users.update({
+          where: {
+            user_id: userId,
+          },
+          data: {
+            avatar: file.filename,
+          },
+        });
+
+        return responseObject(200, "Upload avatar successfully!", userInfo);
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!")); 
+      }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
