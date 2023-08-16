@@ -62,27 +62,17 @@ export class LocationService {
   // Get location by location_id
   async getLocationByLocationId(locationId) {
     try {
-      let checkLocation = await this.prisma.location.findFirst({
+      let checkLocation = await this.prisma.location.findUnique({
         where: {
           location_id: locationId
         }
       })
 
       if (checkLocation) {
-        return {
-          statusCode: 200,
-          message: 'Get location successfully!',
-          content: checkLocation,
-          dateTime: new Date().toISOString(),
-        };
+        return responseObject(200, 'Get location successfully!', checkLocation); 
       }
       else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'Location is not found',
-          dateTime: new Date().toISOString(),
-        });
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!")); 
       }
     }
     catch (err) {
@@ -95,6 +85,7 @@ export class LocationService {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userRole = decodedToken["user_role"];
+      const userId = decodedToken['user_id'];
 
       let { location_name, province, nation, location_image } = updateLocation;
 
@@ -105,25 +96,39 @@ export class LocationService {
         location_image
       };
 
-      if (userRole === Roles.ADMIN) {
-        let checkLocation = await this.prisma.location.findUnique({
+      // Check if locationId exists 
+      let checkLocation = await this.prisma.location.findUnique({
+        where: {
+          location_id: locationId
+        }
+      });
+
+      if (checkLocation) {
+        // Check if userId from token exists
+        let checkUser = await this.prisma.users.findUnique({
           where: {
-            location_id: +locationId
+            user_id: userId
           }
-        });
-        if (checkLocation) {
-          const newUpdate = await this.prisma.location.update({
-            where: {
-              location_id: +locationId
-            },
-            data: newLocation
-          });
-          return responseObject(200, "Update location successfully!", newUpdate);
+        }); 
+
+        if (checkUser) {
+          if (userRole === Roles.ADMIN) {
+            const newUpdate = await this.prisma.location.update({
+              where: {
+                location_id: locationId
+              },
+              data: newLocation
+            });
+
+            return responseObject(200, "Update location successfully!", newUpdate);
+          } else {
+            throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+          }
         } else {
-          throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));
+          throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!")); 
         }
       } else {
-        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));
       }
     }
     catch (err) {
@@ -132,7 +137,7 @@ export class LocationService {
   }
 
   // Get location by pagination
-  async getLocationPagination(pageIndex, pageSize, keyWord) {
+  async getLocationPagination(pageIndex, pageSize, keyword) {
     try {
       const startIndex = (pageIndex - 1) * pageSize;
       const endIndex = startIndex + pageSize;
@@ -140,30 +145,30 @@ export class LocationService {
       let filteredItems = await this.prisma.location.findMany({
         where: {
           location_name: {
-            contains: keyWord,
+            contains: keyword,
           },
         },
       });
 
-      if (keyWord) {
-        filteredItems = filteredItems.filter((item) =>
-          item.location_name.toLowerCase().includes(keyWord.toLowerCase()),
-        );
-      }
+      if (filteredItems.length > 0) {
+        if (keyword) {
+          filteredItems = filteredItems.filter((item) =>
+            item.location_name.toLowerCase().includes(keyword.toLowerCase()),
+          );
+        }
 
-      const itemSlice = filteredItems.slice(startIndex, endIndex);
-      return {
-        statusCode: 200,
-        message: 'Get locations successfully',
-        content: {
+        const itemSlice = filteredItems.slice(startIndex, endIndex);
+
+        return responseObject(200, "Get locations successfully!", {
           pageIndex,
           pageSize,
           totalRow: filteredItems.length,
-          keyword: `Location name LIKE %${keyWord}%`,
-          data: itemSlice,
-        },
-        dateTime: new Date().toISOString(),
-      };
+          keyword: `Location name LIKE $%{keyword}%`,
+          data: itemSlice
+        });
+      } else {
+        return responseObject(200, "No matching results found!", filteredItems);
+      }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -174,27 +179,40 @@ export class LocationService {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userRole = decodedToken['user_role'];
+      const userId = decodedToken['user_id'];
 
+      // Check if locationId exists 
       let checkLocation = await this.prisma.location.findUnique({
         where: {
-          location_id: +locationId
+          location_id: locationId
         }
       });
 
       if (checkLocation) {
-        if (userRole === Roles.ADMIN) {
-          let uploadImg = await this.prisma.location.update({
-            where: {
-              location_id: +locationId
-            },
-            data: {
-              location_image: file.filename
-            }
-          });
-          return responseObject(200, "Upload image successfully!", uploadImg);
+        // Check if userId from token exists 
+        let checkUser = await this.prisma.users.findUnique({
+          where: {
+            user_id: userId
+          }
+        }); 
+
+        if (checkUser) {
+          if (userRole === Roles.ADMIN) {
+            let uploadImg = await this.prisma.location.update({
+              where: {
+                location_id: locationId
+              },
+              data: {
+                location_image: file.filename
+              }
+            });
+            return responseObject(201, "Upload image successfully!", uploadImg);
+          } else {
+            throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+          }
         } else {
-          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
-        }
+          throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!")); 
+        } 
       } else {
         throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));
       }
@@ -208,38 +226,44 @@ export class LocationService {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userRole = decodedToken['user_role'];
+      const userId = decodedToken['user_id'];
 
+      // Check if locationId exists
       let checkLocation = await this.prisma.location.findUnique({
         where: {
-          location_id: +locationId
+          location_id: locationId
         }
       });
 
       if (checkLocation) {
-        if (userRole === Roles.ADMIN) {
-          // Delete location_id if exists in rooms model as foreign key 
-          let checkLocationRoom = await this.prisma.rooms.findFirst({
-            where: {
-              location_id: +locationId
-            }
-          });
-          if (checkLocationRoom) {
+        // Check if userId from token exists 
+        let checkUser = await this.prisma.users.findUnique({
+          where: {
+            user_id: userId
+          }
+        });
+
+        if (checkUser) {
+          if (userRole === Roles.ADMIN) {
+            // Delete locationId if exists in rooms model as foreign key 
             await this.prisma.rooms.deleteMany({
               where: {
-                location_id: +locationId
+                location_id: locationId
               }
             });
 
-            // Delete location_id in location model as primary key 
-            const deletedLocation = await this.prisma.location.delete({
+            // Delete locationId in location model as primary key
+            let deletedLocation = await this.prisma.location.delete({
               where: {
-                location_id: +locationId
+                location_id: locationId
               }
             });
             return responseObject(200, "Delete location successfully!", deletedLocation);
+          } else {
+            throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
           }
         } else {
-          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+          throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!"));
         }
       } else {
         throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));

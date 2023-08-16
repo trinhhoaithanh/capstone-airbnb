@@ -33,9 +33,9 @@ export class LocationController {
   }
 
   // Get location by location_id
-  @ApiParam({ name: 'location_id' })
-  @Get("get-location-by-location-id/:location_id")
-  getLocationByLocationId(@Param('location_id') locationId) {
+  @ApiParam({ name: 'id' })
+  @Get(":id")
+  getLocationByLocationId(@Param('id') locationId) {
     return this.locationService.getLocationByLocationId(Number(locationId))
   }
 
@@ -45,18 +45,22 @@ export class LocationController {
     description: "Your authentication token",
     required: true
   })
-  @Put("update-location/:location_id")
+  @Put(":id")
   updateLocation(
     @Headers("token") token,
-    @Param("location_id") locationId: number,
+    @Param("id") locationId: number,
     @Body() updateLocation: UpdateLocationDto
   ) {
-    return this.locationService.updateLocation(token, locationId, updateLocation);
+    return this.locationService.updateLocation(token, +locationId, updateLocation);
   }
 
   // Pagination of location
-  @Get('get-location-pagination')
-  getLocationPagination(@Query('pageIndex') pageIndex: number, @Query('pageSize') pageSize: number, @Query('keyword') keyWord: string) {
+  @Get('pagination')
+  getLocationPagination(
+    @Query('pageIndex') pageIndex: number, 
+    @Query('pageSize') pageSize: number, 
+    @Query('keyword') keyWord: string
+  ) {
     return this.locationService.getLocationPagination(pageIndex, pageSize, keyWord)
   }
 
@@ -74,13 +78,13 @@ export class LocationController {
       filename: (req, file, callback) => callback(null, new Date().getTime() + file.originalname)
     })
   }))
-  @Post("upload-image")
+  @Post("upload-location-image")
   uploadImage(
     @Headers("token") token,
-    @Query("location_id") locationId: number,
+    @Query("id") locationId: number,
     @UploadedFile() file: Express.Multer.File
   ) {
-    return this.locationService.uploadImage(token, locationId, file);
+    return this.locationService.uploadImage(token, +locationId, file);
   }
 
   // Delete location
@@ -89,11 +93,11 @@ export class LocationController {
     description: "Your authentication token",
     required: true
   })
-  @Delete("delete-location/:location_id")
+  @Delete(":id")
   deleteLocation(
     @Headers("token") token,
-    @Param("location_id") locationId: number
+    @Param("id") locationId: number
   ) {
-    return this.locationService.deleteLocation(token, locationId);
+    return this.locationService.deleteLocation(token, +locationId);
   }
 }
