@@ -33,6 +33,7 @@ export class ReservationsService {
         user_id: userId
       };
 
+      // Check userId from token if exists 
       let checkUser = await this.prisma.users.findUnique({
         where: {
           user_id: userId
@@ -55,7 +56,7 @@ export class ReservationsService {
           throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
         }
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!"));
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!"));
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -65,26 +66,16 @@ export class ReservationsService {
   // Get reservation by reservation_id
   async getReservationById(reservationId) {
     try {
-      let checkReservation = await this.prisma.reservations.findFirst({
+      let checkReservation = await this.prisma.reservations.findUnique({
         where: {
           reservation_id: reservationId,
         },
       });
 
       if (checkReservation) {
-        return {
-          statusCode: 200,
-          message: 'Get reservation successfully!',
-          content: checkReservation,
-          dateTime: new Date().toISOString(),
-        };
+        return responseObject(200, 'Get reservation successfully!', checkReservation); 
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'Reservation is not found',
-          dateTime: new Date().toISOString(),
-        });
+        throw new NotFoundException(responseObject(404, 'Request is invalid', "Reservation not found!")); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -94,9 +85,7 @@ export class ReservationsService {
   // Get reservation by user_id
   async getReservationByUserId(userId) {
     try {
-
-
-      let checkUser = await this.prisma.users.findFirst({
+      let checkUser = await this.prisma.users.findUnique({
         where: {
           user_id: userId
         }
@@ -110,26 +99,14 @@ export class ReservationsService {
         });
 
         if (checkReservation.length > 0) {
-          return {
-            statusCode: 200,
-            message: 'Get reservations successfully!',
-            content: checkReservation,
-            dateTime: new Date().toISOString(),
-          };
+          return responseArray(200, "Get reservations successfully!", checkReservation.length, checkReservation); 
         } else {
-          throw new NotFoundException({
-            statusCode: 400,
-            message: 'Request is invalid',
-            content: 'This user has not reserved any room yet',
-            dateTime: new Date().toISOString(),
-          });
+          return responseObject(200, "This user hasn't booked any room yet!", checkReservation); 
         }
       }
       else {
         throw new NotFoundException(responseObject(404, "Request is invalid", "User not found"))
       }
-
-
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -137,105 +114,83 @@ export class ReservationsService {
 
   // Update reservation
   async updateReservation(reservationId, token, reservationUpdate) {
-    // try {
-    const decodedToken = await this.jwtService.decode(token);
-    const userId = decodedToken['user_id'];
+    try {
+      const decodedToken = await this.jwtService.decode(token);
+      const userId = decodedToken['user_id'];
 
-    const { room_id, start_date, end_date, guest_amount } = reservationUpdate;
+      const { room_id, start_date, end_date, guest_amount } = reservationUpdate;
 
-    let newData = {
-      room_id,
-      start_date,
-      end_date,
-      guest_amount,
-    };
+      let newData = {
+        room_id,
+        start_date,
+        end_date,
+        guest_amount,
+      };
 
-    let checkReservation = await this.prisma.reservations.findFirst({
-      where: {
-        reservation_id: Number(reservationId),
-      },
-    });
-
-    // Check if reservation_id exists in reservations table
-    if (checkReservation) {
-      let checkUser = await this.prisma.reservations.findFirst({
+      let checkReservation = await this.prisma.reservations.findUnique({
         where: {
-          user_id: userId,
+          reservation_id: reservationId,
         },
       });
 
-      // Check if user_id matches that reservation_id
-      if (checkUser) {
-        let checkRoom = await this.prisma.rooms.findFirst({
-          where: {
-            room_id
-          }
-        })
-        if (checkRoom) {
-          return {
-            statusCode: 200,
-            message: 'Update reservation successfully!',
-            content: await this.prisma.reservations.update({
-              where: {
-                reservation_id: Number(reservationId),
-              },
-              data: newData,
-            }),
-            dateTime: new Date().toISOString(),
-          };
-        }
-        else {
-          throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found"))
-        }
+      // Check if reservationId exists
+      if (checkReservation) {
+        if (userId === checkReservation.user_id) {
+          let checkRoom = await this.prisma.rooms.findUnique({
+            where: {
+              room_id
+            }
+          });
 
+          if (checkRoom) {
+            const update = await this.prisma.reservations.update({
+              where: {
+                reservation_id: reservationId
+              },
+              data: newData
+            });
+
+            return responseObject(200, "Update reservation successfully!", update);
+          } else {
+            throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found"))
+          }
+        } else {
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!")); 
+        }
       } else {
-        throw new ForbiddenException({
-          statusCode: 403,
-          message: 'Request is invalid',
-          content: 'You are not allowed to update this',
-          dateTime: new Date().toISOString(),
-        });
+        throw new NotFoundException(responseObject(404, 'Request is invalid', "Reservation not found!"));
       }
-    } else {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: 'Request is invalid',
-        content: 'Reservation not found',
-        dateTime: new Date().toISOString(),
-      });
+    } catch (err) {
+      throw new HttpException(err.response, err.status);
     }
-    // } catch (err) {
-    //   throw new HttpException(err.response, err.status);
-    // }
   }
 
-  // Delete reservation by reservation id
-  async deleteReservationByReservationId(reservationId) {
-    let checkReservation = await this.prisma.reservations.findFirst({
+  // Delete reservation by reservation_id
+  async deleteReservation(reservationId, token) {
+    const decodedToken = await this.jwtService.decode(token);
+    const userId = decodedToken["user_id"];
+
+    // Check if reservationId exists 
+    let checkReservation = await this.prisma.reservations.findUnique({
       where: {
         reservation_id: reservationId,
       },
     });
 
     if (checkReservation) {
-      await this.prisma.reservations.delete({
-        where: {
-          reservation_id: reservationId,
-        },
-      });
-      return {
-        statusCode: 200,
-        message: 'Delete reservation successfully!',
-        content: null,
-        dateTime: new Date().toISOString(),
-      };
+      if (userId === checkReservation.user_id) {
+        await this.prisma.reservations.delete({
+          where: {
+            reservation_id: reservationId,
+          },
+        });
+
+        return responseObject(200, "Delete reservation successfully!", null);
+      } else {
+        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+      }
     } else {
-      throw new NotFoundException({
-        statusCode: 404,
-        message: 'Request is invalid',
-        content: 'Reservation not found',
-        dateTime: new Date().toISOString(),
-      });
+      throw new NotFoundException(responseObject(404, "Request is invalid", "Reservation not found!"));
     }
   }
 }

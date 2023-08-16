@@ -27,32 +27,26 @@ export class ReservationsController {
   }
 
   // Get reservation by reservation_id
-  @ApiParam({ name: 'reservation_id' })
-  @Get('get-reservation-by-id/:reservation_id')
-  getReservationById(@Param('reservation_id') reservationId: number) {
+  @Get(':id')
+  getReservationById(@Param('id') reservationId: number) {
     return this.reservationsService.getReservationById(Number(reservationId));
   }
 
   // Get reservation by user_id
-  @ApiParam({ name: 'user_id' })
-  @Get('get-reservation-by-user-id/:user_id')
+  @Get('reservation-by-user/:user_id')
   getReservationByUserId(@Param('user_id') userId: number) {
     return this.reservationsService.getReservationByUserId(Number(userId));
   }
 
   // Update reservation
-  @ApiParam({
-    name: 'reservation_id',
-    required: true,
-  })
   @ApiHeader({
     name: 'token',
     description: 'Your authentication token',
     required: true,
   })
-  @Put('update-reservation/:reservation_id')
+  @Put(':id')
   updateReservation(
-    @Param('reservation_id') reservationId: number,
+    @Param('id') reservationId: number,
     @Headers('token') token,
     @Body() reservationUpdate: UpdateReservationDto,
   ) {
@@ -63,15 +57,16 @@ export class ReservationsController {
     );
   }
 
-  // Delete reservation by reservation id
-  @ApiParam({
-    name: 'reservation_id',
-    required: true,
+  // Delete reservation by reservation_id
+  @ApiHeader({
+    name: "token",
+    description: "Your authentication token",
+    required: true
   })
-  @Delete('delete-reservation-by-reservation-id/:reservation_id')
-  deleteReservationByReservationId(@Param('reservation_id') reservationId: number) {
-    return this.reservationsService.deleteReservationByReservationId(
-      Number(reservationId),
+  @Delete(':id')
+  deleteReservation(@Param('id') reservationId: number, @Headers("token") token) {
+    return this.reservationsService.deleteReservation(
+      Number(reservationId), token
     );
   }
 }
