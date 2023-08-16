@@ -25,7 +25,10 @@ export class LocationController {
     required: true,
   })
   @Post()
-  createLocation(@Headers('token') token, @Body() location: CreateLocationDto) {
+  createLocation(
+    @Headers('token') token, 
+    @Body() location: CreateLocationDto
+  ) {
     return this.locationService.createLocation(token, location);
   }
 

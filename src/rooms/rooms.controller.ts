@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Header, Headers, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { ApiBody, ApiConsumes, ApiHeader, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateRoomDto } from './dto/create-room.dto';
@@ -30,7 +30,7 @@ export class RoomsController {
   }
 
   // Get rooms by search pagination
-  @Get('get-rooms-by-pagination')
+  @Get('pagination')
   getRoomsByPagination(
     @Query('pageIndex') pageIndex: number,
     @Query('pageSize') pageSize: number,
@@ -40,13 +40,13 @@ export class RoomsController {
   }
 
   // Get room by room_id
-  @Get('get-room-by-id/:room_id')
-  getRoomById(@Query('room_id') roomId: number) {
+  @Get(':id')
+  getRoomById(@Param('id') roomId: number) {
     return this.roomsService.getRoomById(+roomId);
   }
 
   // Get room by location_id
-  @Get('get-room-by-location-id')
+  @Get('rooms-by-location')
   getRoomByLocationId(@Query('location_id') locationId: number) {
     return this.roomsService.getRoomByLocationId(Number(locationId));
   }
@@ -58,11 +58,11 @@ export class RoomsController {
     required: true,
   })
   @ApiParam({
-    name: 'room_id'
+    name: 'id'
   })
-  @Put(':room_id')
+  @Put(':id')
   updateRoomByRoomId(
-    @Param('room_id') roomId, 
+    @Param('id') roomId, 
     @Headers('token') token, 
     @Body() roomInfo: UpdateRoomDto
   ) {
@@ -71,7 +71,7 @@ export class RoomsController {
 
   // Delete room by room id
   @ApiParam({
-    name: 'room_id',
+    name: 'id',
     required: true
   })
   @ApiHeader({
@@ -79,8 +79,8 @@ export class RoomsController {
     description: 'Your authentication token',
     required: true,
   })
-  @Delete('delete-room-by-room-id/:room_id')
-  deleteRoomByRoomId(@Param('room_id') roomId, @Headers('token') token) {
+  @Delete(':id')
+  deleteRoomByRoomId(@Param('id') roomId: number, @Headers('token') token) {
     return this.roomsService.deleteRoomByRoomId(Number(roomId), token)
   }
 
@@ -103,12 +103,12 @@ export class RoomsController {
     required: true,
   })
   @ApiQuery({ name: 'room_id' })
-  @Post('upload-room-img')
+  @Post('upload-room-image')
   uploadAvatar(
     @Query('room_id') roomId: number,
     @UploadedFile() file: Express.Multer.File,
     @Headers('token') token,
   ) {
-    return this.roomsService.uploadRoomImg(token, file, Number(roomId));
+    return this.roomsService.uploadRoomImg(+roomId, file, token);
   }
 }

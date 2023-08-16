@@ -24,26 +24,36 @@ export class LocationService {
   async createLocation(token, location) {
     try {
       const userRole = await this.jwtService.decode(token)['user_role']; 
-       
-      if (userRole === Roles.ADMIN) {
-        const { location_name, province, nation, location_image } = location;
+      const userId = await this.jwtService.decode(token)['user_id']; 
 
-        let newLocation = {
-          location_name,
-          province,
-          nation,
-          location_image,
-        };
+      let checkUser = await this.prisma.users.findUnique({
+        where: {
+          user_id: userId
+        }
+      }); 
 
-        await this.prisma.location.create({
-          data: newLocation,
-        });
+      if (checkUser) {
+        if (userRole === Roles.ADMIN) {
+          const { location_name, province, nation, location_image } = location;
 
-        return responseObject(201, "Create location successfully!", newLocation);
-      }
-      else {
-        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
-      }
+          let newLocation = {
+            location_name,
+            province,
+            nation,
+            location_image,
+          };
+
+          const create = await this.prisma.location.create({
+            data: newLocation,
+          });
+
+          return responseObject(201, "Create location successfully!", create);
+        } else {
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+        }
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!")); 
+      } 
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }

@@ -78,14 +78,14 @@ export class RoomsService {
           throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
         }
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid!", "User not found!"));
+        throw new NotFoundException(responseObject(404, "Request is invalid!", "User doesn't exist!"));
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
 
-  // Get rooms by pagination
+  // Get rooms by search pagination
   async getRoomsByPagination(pageIndex, pageSize, keyword) {
     try {
       const startIndex = (pageIndex - 1) * pageSize;
@@ -108,23 +108,17 @@ export class RoomsService {
 
         const itemSlice = filteredItems.slice(startIndex, endIndex);
 
-        return {
-          statusCode: 200,
-          message: 'Get rooms successfully',
-          content: {
-            pageIndex,
-            pageSize,
-            totalRow: filteredItems.length,
-            keyword: `Room name LIKE %${keyword}%`,
-            data: itemSlice,
-          },
-          dateTime: new Date().toISOString(),
-        };
+        return responseObject(200, "Get rooms successfully!", {
+          pageIndex, 
+          pageSize,
+          totalRow: filteredItems.length,
+          keyword: `Room name LIKE %${keyword}%`,
+          data: itemSlice
+        })
       }
       else {
-        return responseObject(200, "No keyword matching!", filteredItems)
+        return responseObject(200, "No matching results found!", filteredItems)
       }
-
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
@@ -133,55 +127,46 @@ export class RoomsService {
   // Get room by room_id
   async getRoomById(roomId) {
     try {
-      let checkRoom = await this.prisma.rooms.findFirst({
+      let checkRoom = await this.prisma.rooms.findUnique({
         where: {
-          room_id: roomId,
-        },
+          room_id: roomId
+        }
       });
 
       if (checkRoom) {
-        return {
-          statusCode: 200,
-          message: 'Get room successfully!',
-          content: checkRoom,
-          dateTime: new Date().toISOString(),
-        };
+        return responseObject(200, "Get room successfully!", checkRoom); 
       } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'Room not found',
-          dateTime: new Date().toISOString(),
-        });
+        throw new NotFoundException(responseObject(404, 'Request is invalid', "Room not found!")); 
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
 
-  // get room by location id
-  async getRoomByLocationId(locationId: number) {
+  // Get room by location_id
+  async getRoomByLocationId(locationId) {
     try {
-      let checkRoomByLocation = await this.prisma.rooms.findMany({
+      // Check if location_id exists 
+      let checkLocation = await this.prisma.location.findUnique({
         where: {
-          location_id: locationId,
-        },
+          location_id: locationId
+        }
       });
 
-      if (checkRoomByLocation.length > 0) {
-        return {
-          statusCode: 200,
-          message: 'Get room by location id successfully!',
-          content: checkRoomByLocation,
-          dateTime: new Date().toISOString(),
-        };
-      } else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'Invalid location',
-          dateTime: new Date().toISOString(),
+      if (checkLocation) {
+        let getRooms = await this.prisma.rooms.findMany({
+          where: {
+            location_id: locationId,
+          },
         });
+
+        if (getRooms.length > 0) {
+          return responseArray(200, 'Get room by location successfully!', getRooms.length, getRooms);
+        } else {
+          return responseObject(200, "No rooms at this location!", getRooms);
+        }
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -190,7 +175,7 @@ export class RoomsService {
 
   // Update room by room_id (only admin can update it)
   async updateRoomByRoomId(roomId, token, roomInfo) {
-    try {
+    // try {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken['user_id'];
       const userRole = decodedToken['user_role'];
@@ -216,6 +201,7 @@ export class RoomsService {
         location_id,
         image,
       };
+
       // Check if user_id from token exists
       let checkUser = await this.prisma.users.findUnique({
         where: {
@@ -254,52 +240,68 @@ export class RoomsService {
           throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
         }
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!"));
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!"));
       }
-    }
-    catch (err) {
-      throw new HttpException(err.response, err.status);
-    }
+    // }
+    // catch (err) {
+    //   throw new HttpException(err.response, err.status);
+    // }
   }
 
-  // Delete room by room id
+  // Delete room by room_id
   async deleteRoomByRoomId(roomId, token) {
     try {
-      let decodedToken = await this.jwtService.decode(token);
-      let userRole = decodedToken['user_role'];
+      const decodedToken = await this.jwtService.decode(token);
+      const userRole = decodedToken['user_role'];
+      const userId = decodedToken['user_id'];
 
-      if (userRole === Roles.ADMIN) {
-        let checkRoom = await this.prisma.rooms.findFirst({
-          where: {
-            room_id: roomId
-          }
-        });
-
-        if (checkRoom) {
-          await this.prisma.reservations.deleteMany({
-            where: {
-              room_id: roomId
-            }
-          })
-
-          await this.prisma.reviews.deleteMany({
-            where: {
-              room_id: roomId
-            }
-          })
-
-          await this.prisma.rooms.delete({
+      // Check if userId from token exists
+      let checkUser = await this.prisma.users.findUnique({
+        where: {
+          user_id: userId
+        }
+      }); 
+      
+      if (checkUser) {
+        if (userRole === Roles.ADMIN) {
+          // Check if roomId exists 
+          let checkRoom = await this.prisma.rooms.findUnique({
             where: {
               room_id: roomId
             }
           });
-
-          return responseObject(200, "Delete room successfully");
+  
+          if (checkRoom) {
+            // Delete if roomId exists in reservations model as foreign key 
+            await this.prisma.reservations.deleteMany({
+              where: {
+                room_id: roomId
+              }
+            })
+  
+            // Delete if roomId exists in reviews model as foreign key
+            await this.prisma.reviews.deleteMany({
+              where: {
+                room_id: roomId
+              }
+            })
+  
+            // Delete roomId in rooms model as primary key
+            let deletedRoom = await this.prisma.rooms.delete({
+              where: {
+                room_id: roomId
+              }
+            });
+  
+            return responseObject(200, "Delete room successfully!", deletedRoom);
+          } else {
+            throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
+          }
         } else {
-          throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
         }
       } else {
-        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+        throw new NotFoundException(responseObject(404, 'Request is invalid', "User doesn't exist!")); 
       }
     }
     catch (err) {
@@ -309,43 +311,52 @@ export class RoomsService {
   }
 
   // Upload room's image
-  async uploadRoomImg(token, file, roomId) {
+  async uploadRoomImg(roomId, file, token) {
     try {
       const decodedToken = await this.jwtService.decode(token);
-      let userRole = decodedToken['user_role']
+      const userRole = decodedToken['user_role'];
+      const userId = decodedToken['user_id'];
 
-      if (userRole === Roles.ADMIN) {
-        let checkRoom = await this.prisma.rooms.findFirst({
+      // Check if room_id exists
+      let checkRoom = await this.prisma.rooms.findUnique({
+        where: {
+          room_id: roomId
+        }
+      });
+
+      if (checkRoom) {
+        // Check if userId from token exists
+        let checkUser = await this.prisma.users.findUnique({
           where: {
-            room_id: roomId
+            user_id: userId
           }
-        })
+        });
 
-        if (checkRoom) {
-          let roomInfo = await this.prisma.rooms.update({
-            where: {
-              room_id: roomId
-            },
-            data: {
-              image: file.filename,
-            },
-          });
+        if (checkUser) {
+          if (userRole === Roles.ADMIN) {
+            let roomInfo = await this.prisma.rooms.update({
+              where: {
+                room_id: roomId
+              },
+              data: {
+                image: file.filename,
+              },
+            });
 
-          return responseObject(200, "Upload avatar successfully!", roomInfo);
+            return responseObject(201, "Upload avatar successfully!", roomInfo);
+          } else {
+            throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+          }
+        } else {
+          throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!"));
         }
-        else {
-          throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
-        }
-
-      }
-      else {
-        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to upload!"));
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
       }
     }
     catch (err) {
       throw new HttpException(err.response, err.status);
     }
-
   }
 
 }
