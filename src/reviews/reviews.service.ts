@@ -1,7 +1,6 @@
 import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
-import { check } from 'prettier';
 import { Roles } from 'src/enum/roles.enum';
 import { responseArray, responseObject } from 'src/util/response-template';
 
@@ -59,7 +58,7 @@ export class ReviewsService {
           throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
         }
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid", "User not found!"));
+        throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!"));
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -67,70 +66,60 @@ export class ReviewsService {
   }
 
   // Update review (only user can update his/her own review or admin can update)
-  async updateReview(token, review_id, reviewUpdate) {
+  async updateReview(token, reviewId, reviewUpdate) {
     try {
       const decodedToken = await this.jwtService.decode(token);
       const userId = decodedToken['user_id'];
+      const userRole = decodedToken['user_role'];
 
       let checkReview = await this.prisma.reviews.findUnique({
         where: {
-          review_id
+          review_id: reviewId
         }
-      })
+      });
 
       if (checkReview) {
-        if (checkReview.user_id === userId) {
-          let { user_id, review_date, content, rating } =
-            reviewUpdate;
-
+        if (userId === checkReview.user_id || userRole === Roles.ADMIN) {
+          const { room_id, content, rating } = reviewUpdate;
           let newReview = {
-
-            user_id: userId,
+            room_id,
             review_date: new Date(),
             content,
             rating
-          }
-
-          await this.prisma.reviews.update({
-            where: {
-              review_id: review_id,
-            },
-            data: newReview,
-          });
-          return {
-            statusCode: 200,
-            message: 'Update review successfully',
-            content: newReview,
-            dateTime: new Date().toISOString(),
           };
-        }
-        else {
-          throw new ForbiddenException({
-            statusCode: 403,
-            message: "You don't have permission to access!",
-            dateTime: new Date().toISOString(),
-          })
-        }
 
-      }
-      else {
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'Review not found!',
-          dateTime: new Date().toISOString(),
-        })
-      }
+          let checkRoom = await this.prisma.rooms.findUnique({
+            where: {
+              room_id
+            }
+          });
 
+          if (checkRoom) {
+            const update = await this.prisma.reviews.update({
+              where: {
+                review_id: reviewId
+              },
+              data: newReview
+            });
+            return responseObject(200, "Update review successfully!", update);
+          } else {
+            throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
+          }
+        } else {
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+        }
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Review not found!"));
+      }
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
   }
 
   // Get reviews by room_id
-  async getReviewByRoom(roomId: number) {
+  async getReviewByRoom(roomId) {
     try {
-      let checkRoom = await this.prisma.rooms.findFirst({
+      let checkRoom = await this.prisma.rooms.findUnique({
         where: {
           room_id: roomId,
         },
@@ -163,32 +152,14 @@ export class ReviewsService {
               date: review.review_date,
               rating: review.rating
             }
-          })
+          });
 
-          return {
-            statusCode: 200,
-            message: 'Get reviews successfully!',
-            total: data.length,
-            content: newData,
-            dateTime: new Date().toISOString(),
-          };
+          return responseArray(200, "Get reviews successfully!", data.length, newData);
         } else {
-          // When room doesn't have any reviews yet
-          return {
-            statusCode: 200,
-            message: "This room doesn't have any reviews yet!",
-            content: null,
-            dateTime: new Date().toISOString(),
-          };
+          return responseObject(200, "This room doesn't have any reviews yet!", checkRoomInReview);
         }
       } else {
-        // When room doesn't exist
-        throw new NotFoundException({
-          statusCode: 404,
-          message: 'Request is invalid',
-          content: 'Room not found',
-          dateTime: new Date().toISOString(),
-        });
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
       }
     } catch (err) {
       throw new HttpException(err.response, err.status);
@@ -198,32 +169,29 @@ export class ReviewsService {
   //Delete review by review_id
   async deleteReviewByReviewId(reviewId, token) {
     try {
-      let decodedToken = await this.jwtService.decode(token)
-      let userRole = decodedToken['user_role']
+      const decodedToken = await this.jwtService.decode(token);
+      const userRole = decodedToken['user_role'];
+      const userId = decodedToken['user_id'];
 
-      if (userRole === Roles.ADMIN) {
-        let checkReview = await this.prisma.reviews.findFirst({
-          where: {
-            review_id: reviewId
-          }
-        })
+      let checkReview = await this.prisma.reviews.findUnique({
+        where: {
+          review_id: reviewId
+        }
+      });
 
-        if (checkReview) {
-
+      if (checkReview) {
+        if (userId === checkReview.user_id || userRole === Roles.ADMIN) {
           await this.prisma.reviews.delete({
             where: {
               review_id: reviewId
             }
-          })
-
-          return responseObject(200, "Delete room successfully");
+          });
+          return responseObject(200, "Delete review successfully!", null);
+        } else {
+          throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
         }
-        else {
-          throw new NotFoundException(responseObject(404, "Request is invalid", "Review not found!"));
-        }
-      }
-      else {
-        throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
+      } else {
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Review not found!"));
       }
     }
     catch (err) {

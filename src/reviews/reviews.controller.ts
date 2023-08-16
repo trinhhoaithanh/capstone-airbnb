@@ -32,41 +32,37 @@ export class ReviewsController {
     description: 'Your authentication token',
     required: true,
   })
-  @Put('update-review/:review_id')
+  @Put(':id')
   updateReview(
     @Headers('token') token,
-    @Param('review_id') review_id: number,
+    @Param('id') reviewId: number,
     @Body() reviewUpdate: UpdateReviewDto,
   ) {
     return this.reviewsService.updateReview(
       token,
-      Number(review_id),
+      Number(reviewId),
       reviewUpdate,
     );
   }
 
   // Get reviews by room_id
-  @ApiParam({
-    name: "room_id",
-    required: true
-  })
-  @Get('get-review-by-room/:room_id')
+  @Get('reviews-by-room/:room_id')
   getReviewByRoom(@Param('room_id') roomId: Number) {
     return this.reviewsService.getReviewByRoom(+roomId);
   }
 
   // Delete review by review_id
-  @ApiParam({
-    name: "review_id",
-    required: true
-  })
   @ApiHeader({
     name: 'token',
     description: 'Your authentication token',
     required: true,
   })
-  @Delete('delete-review-by-review-id/:review_id')
-  deleteReviewByReviewId(@Param('review_id') reviewId, @Headers('token') token) {
+  @ApiParam({
+    name: "id",
+    required: true
+  })
+  @Delete(':id')
+  deleteReviewByReviewId(@Param('id') reviewId, @Headers('token') token) {
     return this.reviewsService.deleteReviewByReviewId(Number(reviewId), token)
   }
 }
