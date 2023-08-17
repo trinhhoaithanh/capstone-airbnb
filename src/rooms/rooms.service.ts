@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { Roles } from 'src/enum/roles.enum';
 import { responseArray, responseObject } from 'src/util/response-template';
+import { getUserInfoFromToken } from 'src/util/decoded-token';
 
 @Injectable()
 export class RoomsService {
@@ -23,9 +24,7 @@ export class RoomsService {
   // Only admin can create new room
   async createRoom(token, room) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
-      const userRole = decodedToken['user_role'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token); 
 
       const { room_name, client_number, bed_room, bed, bath_room, description, price, washing_machine, iron, tivi, air_conditioner, wifi, kitchen, parking, pool, location_id, image } = room;
 
@@ -176,9 +175,7 @@ export class RoomsService {
   // Update room by room_id (only admin can update it)
   async updateRoomByRoomId(roomId, token, roomInfo) {
     // try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
-      const userRole = decodedToken['user_role'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       let { room_name, client_number, bed_room, bed, bath_room, description, price, washing_machine, iron, tivi, air_conditioner, wifi, kitchen, parking, pool, location_id, image } = roomInfo;
 
@@ -251,9 +248,7 @@ export class RoomsService {
   // Delete room by room_id
   async deleteRoomByRoomId(roomId, token) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userRole = decodedToken['user_role'];
-      const userId = decodedToken['user_id'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       // Check if userId from token exists
       let checkUser = await this.prisma.users.findUnique({
@@ -313,9 +308,7 @@ export class RoomsService {
   // Upload room's image
   async uploadRoomImg(roomId, file, token) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userRole = decodedToken['user_role'];
-      const userId = decodedToken['user_id'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       // Check if room_id exists
       let checkRoom = await this.prisma.rooms.findUnique({

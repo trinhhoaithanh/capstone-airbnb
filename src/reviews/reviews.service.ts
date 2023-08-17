@@ -2,6 +2,7 @@ import { ForbiddenException, HttpException, Injectable, NotFoundException } from
 import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import { Roles } from 'src/enum/roles.enum';
+import { getUserInfoFromToken } from 'src/util/decoded-token';
 import { responseArray, responseObject } from 'src/util/response-template';
 
 @Injectable()
@@ -23,7 +24,7 @@ export class ReviewsService {
   // Create review
   async createReview(token, newReview) {
     try {
-      const userId = await this.jwtService.decode(token)['user_id'];
+      const { userId } = await getUserInfoFromToken(this.jwtService, token);
 
       const { room_id, content, rating } = newReview;
 
@@ -68,9 +69,7 @@ export class ReviewsService {
   // Update review (only user can update his/her own review or admin can update)
   async updateReview(token, reviewId, reviewUpdate) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
-      const userRole = decodedToken['user_role'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       let checkReview = await this.prisma.reviews.findUnique({
         where: {
@@ -169,9 +168,7 @@ export class ReviewsService {
   //Delete review by review_id
   async deleteReviewByReviewId(reviewId, token) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userRole = decodedToken['user_role'];
-      const userId = decodedToken['user_id'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       let checkReview = await this.prisma.reviews.findUnique({
         where: {

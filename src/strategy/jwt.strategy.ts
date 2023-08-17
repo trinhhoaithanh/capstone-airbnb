@@ -16,6 +16,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   //   trả về dữ liệu khi môt api gọi thành công có chứa token
   async validate(user) {
-    return user;
+    return user; 
   }
 }

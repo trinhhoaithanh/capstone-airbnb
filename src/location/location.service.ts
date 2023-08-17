@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { Roles } from 'src/enum/roles.enum';
 import { responseObject } from 'src/util/response-template';
+import { getUserInfoFromToken } from 'src/util/decoded-token';
 
 @Injectable()
 export class LocationService {
@@ -23,8 +24,7 @@ export class LocationService {
   // Create location
   async createLocation(token, location) {
     try {
-      const userRole = await this.jwtService.decode(token)['user_role']; 
-      const userId = await this.jwtService.decode(token)['user_id']; 
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token); 
 
       let checkUser = await this.prisma.users.findUnique({
         where: {
@@ -83,9 +83,7 @@ export class LocationService {
   // Update location by location_id
   async updateLocation(token, locationId, updateLocation) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userRole = decodedToken["user_role"];
-      const userId = decodedToken['user_id'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       let { location_name, province, nation, location_image } = updateLocation;
 
@@ -177,9 +175,7 @@ export class LocationService {
   // Upload image for location
   async uploadImage(token, locationId, file) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userRole = decodedToken['user_role'];
-      const userId = decodedToken['user_id'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       // Check if locationId exists 
       let checkLocation = await this.prisma.location.findUnique({
@@ -224,9 +220,7 @@ export class LocationService {
   // Delete location
   async deleteLocation(token, locationId) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userRole = decodedToken['user_role'];
-      const userId = decodedToken['user_id'];
+      const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       // Check if locationId exists
       let checkLocation = await this.prisma.location.findUnique({

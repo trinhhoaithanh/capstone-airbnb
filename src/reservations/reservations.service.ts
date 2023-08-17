@@ -2,6 +2,7 @@ import { responseArray, responseObject } from './../util/response-template';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ForbiddenException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { getUserInfoFromToken } from 'src/util/decoded-token';
 
 @Injectable()
 export class ReservationsService {
@@ -21,7 +22,7 @@ export class ReservationsService {
   // Create reservation
   async createReservation(token, reservation) {
     try {
-      const userId = await this.jwtService.decode(token)['user_id'];
+      const { userId } = await getUserInfoFromToken(this.jwtService, token);
 
       let { room_id, guest_amount } = reservation;
 
@@ -115,8 +116,7 @@ export class ReservationsService {
   // Update reservation
   async updateReservation(reservationId, token, reservationUpdate) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
+      const { userId } = await getUserInfoFromToken(this.jwtService, token);
 
       const { room_id, start_date, end_date, guest_amount } = reservationUpdate;
 
@@ -167,8 +167,7 @@ export class ReservationsService {
 
   // Delete reservation by reservation_id
   async deleteReservation(reservationId, token) {
-    const decodedToken = await this.jwtService.decode(token);
-    const userId = decodedToken["user_id"];
+    const { userId } = await getUserInfoFromToken(this.jwtService, token);
 
     // Check if reservationId exists 
     let checkReservation = await this.prisma.reservations.findUnique({

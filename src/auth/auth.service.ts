@@ -107,8 +107,8 @@ export class AuthService {
             { user_id: Number(checkUser.user_id), user_role: checkUser.user_role },
             { secret: this.configService.get('KEY'), expiresIn: '60m' },
           );
-
           return responseObject(200, "Login successfully!", { userLogin: checkUser, token: tokenGenerate });
+
         } else {
           throw new BadRequestException(responseObject(400, "Request is invalid", "Password is incorrect!"));
         }

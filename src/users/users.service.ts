@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { Roles } from 'src/enum/roles.enum';
+import { getUserInfoFromToken } from 'src/util/decoded-token';
 
 @Injectable()
 export class UsersService {
@@ -62,9 +63,7 @@ export class UsersService {
   // Only user can delete himself or admin can delete anyone 
   async deleteUserById(deleteId, token) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken["user_id"];
-      const userRole = decodedToken["user_role"];
+      const {userId, userRole} = await getUserInfoFromToken(this.jwtService, token); 
 
       // Check the existence of the user to delete 
       let checkUser = await this.prisma.users.findUnique({
@@ -196,9 +195,7 @@ export class UsersService {
   // Update user
   async updateUser(token, userUpdate) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
-      const userRole = decodedToken['user_role'];
+      const {userId, userRole} = await getUserInfoFromToken(this.jwtService, token); 
 
       const { full_name, email, birth_day, gender, phone } = userUpdate;
 
@@ -237,8 +234,7 @@ export class UsersService {
   // Upload avatar
   async uploadAvatar(token, file: Express.Multer.File) {
     try {
-      const decodedToken = await this.jwtService.decode(token);
-      const userId = decodedToken['user_id'];
+      const { userId } = await getUserInfoFromToken(this.jwtService, token); 
 
       let checkUser = await this.prisma.users.findUnique({
         where: {
