@@ -247,12 +247,12 @@ export class LocationService {
             });
 
             // Delete locationId in location model as primary key
-            let deletedLocation = await this.prisma.location.delete({
+            await this.prisma.location.delete({
               where: {
                 location_id: locationId
               }
             });
-            return responseObject(200, "Delete location successfully!", deletedLocation);
+            return responseObject(200, "Delete location successfully!", null);
           } else {
             throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
           }

@@ -282,13 +282,13 @@ export class RoomsService {
             })
   
             // Delete roomId in rooms model as primary key
-            let deletedRoom = await this.prisma.rooms.delete({
+            await this.prisma.rooms.delete({
               where: {
                 room_id: roomId
               }
             });
   
-            return responseObject(200, "Delete room successfully!", deletedRoom);
+            return responseObject(200, "Delete room successfully!", null);
           } else {
             throw new NotFoundException(responseObject(404, "Request is invalid", "Room not found!"));
           }

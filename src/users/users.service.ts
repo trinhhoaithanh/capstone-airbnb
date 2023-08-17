@@ -89,13 +89,13 @@ export class UsersService {
           });
 
           // Delete user_id in users model as primary key
-          let deletedUser = await this.prisma.users.delete({
+          await this.prisma.users.delete({
             where: {
               user_id: deleteId
             }
           });
 
-          return responseObject(200, "Delete user successfully!", deletedUser);
+          return responseObject(200, "Delete user successfully!", null);
         } else {
           throw new ForbiddenException(responseObject(403, "Request is invalid", "You don't have permission to access!"));
         }
