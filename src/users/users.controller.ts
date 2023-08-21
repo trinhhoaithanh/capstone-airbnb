@@ -20,8 +20,8 @@ export class UsersController {
 
   // Create a user
   @Post()
-  createUser(@Body() user: CreateUserDto) {
-    return this.usersService.createUser(user);
+  createUser(@Body() user: CreateUserDto, @Headers('token') token) {
+    return this.usersService.createUser(user,token);
   }
 
   // Delete user by user_id

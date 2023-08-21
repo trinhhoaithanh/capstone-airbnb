@@ -51,42 +51,6 @@ export class AuthService {
     }
   }
 
-  // Signup for Admin
-  async createAdmin(adminSignup) {
-    try {
-      const { email, pass_word, full_name, birth_day, gender, phone } = adminSignup;
-
-      // Check email if exists
-      let checkEmail = await this.prisma.users.findFirst({
-        where: {
-          email
-        }
-      });
-
-      if (checkEmail) {
-        throw new BadRequestException(responseObject(400, "Request is invalid", "Email already existed!"));
-      } else {
-        let newUser = {
-          email,
-          pass_word: bcrypt.hashSync(pass_word, 10),
-          full_name,
-          birth_day,
-          gender,
-          user_role: Roles.ADMIN,
-          phone,
-        };
-
-        await this.prisma.users.create({
-          data: newUser,
-        });
-
-        return responseObject(200, "Signup successfully!", newUser);
-      }
-    } catch (err) {
-      throw new HttpException(err.response, err.status);
-    }
-  }
-
   // Login
   async login(userLogin) {
     try {

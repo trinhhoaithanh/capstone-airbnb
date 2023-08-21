@@ -17,12 +17,6 @@ export class AuthController {
     return this.authService.signUp(userSignup);
   }
   
-  // Signup for Admin
-  @Post("register-admin")
-  createAdmin(@Body() adminSignup: CreateAuthDto) {
-    return this.authService.createAdmin(adminSignup); 
-  }
-  
   // Login
   @Post('login')
   login(@Body() userLogin: LoginType) {
