@@ -1,6 +1,6 @@
 FROM node:18
 
-WORKDIR /usr/src/app
+WORKDIR /usr/src
 
 
 COPY package*.json .
@@ -17,6 +17,6 @@ COPY . .
 EXPOSE 8080
 
 #node index.js => khởi chạy server 
-CMD [ "node","index.js" ]
+CMD [ "node","main.ts" ]
 
 
