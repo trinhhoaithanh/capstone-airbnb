@@ -19,6 +19,11 @@ export class UsersController {
   }
 
   // Create a user
+  @ApiHeader({
+    name: 'token',
+    description: 'Your authentication token',
+    required: true,
+  })
   @Post()
   createUser(@Body() user: CreateUserDto, @Headers('token') token) {
     return this.usersService.createUser(user,token);
