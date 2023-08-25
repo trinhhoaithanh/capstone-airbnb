@@ -71,7 +71,7 @@ export class UsersService {
             data: newUser,
           });
 
-          return responseObject(200, 'Create user successfully!', newUser);
+          return responseObject(201, 'Create user successfully!', newUser);
         }
       }
       else {
@@ -304,7 +304,7 @@ export class UsersService {
           },
         });
 
-        return responseObject(200, 'Upload avatar successfully!', userInfo);
+        return responseObject(201, 'Upload avatar successfully!', userInfo);
       } else {
         throw new NotFoundException(
           responseObject(404, 'Request is invalid', "User doesn't exist!"),
