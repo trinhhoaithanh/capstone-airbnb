@@ -46,9 +46,9 @@ export class RoomsController {
   }
 
   // Get room by location_id
-  @Get('rooms-by-location')
-  getRoomByLocationId(@Query('location_id') locationId: number) {
-    return this.roomsService.getRoomByLocationId(Number(locationId));
+  @Get("rooms-by-location/:location_id")
+  getRoomByLocation(@Param("location_id") locationId: number) {
+    return this.roomsService.getRoomByLocation(+locationId); 
   }
 
   // Update room by room_id (only admin can update it)

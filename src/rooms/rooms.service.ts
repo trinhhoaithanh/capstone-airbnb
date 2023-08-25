@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Roles } from 'src/enum/roles.enum';
 import { responseArray, responseObject } from 'src/util/response-template';
 import { getUserInfoFromToken } from 'src/util/decoded-token';
+import { get } from 'http';
 
 @Injectable()
 export class RoomsService {
@@ -143,38 +144,36 @@ export class RoomsService {
   }
 
   // Get room by location_id
-  async getRoomByLocationId(locationId) {
+  async getRoomByLocation(locationId) {
     try {
-      // Check if location_id exists 
       let checkLocation = await this.prisma.location.findUnique({
         where: {
           location_id: locationId
         }
-      });
-
+      }); 
+      
       if (checkLocation) {
         let getRooms = await this.prisma.rooms.findMany({
           where: {
-            location_id: locationId,
-          },
-        });
-
+            location_id: locationId
+          }
+        }); 
         if (getRooms.length > 0) {
-          return responseArray(200, 'Get room by location successfully!', getRooms.length, getRooms);
+          return responseArray(200, "Get rooms successfully!", getRooms.length, getRooms); 
         } else {
-          return responseObject(200, "No rooms at this location!", getRooms);
+          return responseObject(200, "Get rooms successfully!", "This location doesn't have any rooms yet!"); 
         }
       } else {
-        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!"));
+        throw new NotFoundException(responseObject(404, "Request is invalid", "Location not found!")); 
       }
     } catch (err) {
-      throw new HttpException(err.response, err.status);
+      throw new HttpException(err.response, err.status)
     }
   }
 
   // Update room by room_id (only admin can update it)
   async updateRoomByRoomId(roomId, token, roomInfo) {
-    // try {
+    try {
       const { userId, userRole } = await getUserInfoFromToken(this.jwtService, token);
 
       let { room_name, client_number, bed_room, bed, bath_room, description, price, washing_machine, iron, tivi, air_conditioner, wifi, kitchen, parking, pool, location_id, image } = roomInfo;
@@ -239,10 +238,10 @@ export class RoomsService {
       } else {
         throw new NotFoundException(responseObject(404, "Request is invalid", "User doesn't exist!"));
       }
-    // }
-    // catch (err) {
-    //   throw new HttpException(err.response, err.status);
-    // }
+    }
+    catch (err) {
+      throw new HttpException(err.response, err.status);
+    }
   }
 
   // Delete room by room_id
