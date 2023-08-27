@@ -134,44 +134,6 @@ export class LocationService {
     }
   }
 
-  // Get location by pagination
-  async getLocationPagination(pageIndex, pageSize, keyword) {
-    try {
-      const startIndex = (pageIndex - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-
-      let filteredItems = await this.prisma.location.findMany({
-        where: {
-          location_name: {
-            contains: keyword,
-          },
-        },
-      });
-
-      if (filteredItems.length > 0) {
-        if (keyword) {
-          filteredItems = filteredItems.filter((item) =>
-            item.location_name.toLowerCase().includes(keyword.toLowerCase()),
-          );
-        }
-
-        const itemSlice = filteredItems.slice(startIndex, endIndex);
-
-        return responseObject(200, "Get locations successfully!", {
-          pageIndex,
-          pageSize,
-          totalRow: filteredItems.length,
-          keyword: `Location name LIKE $%{keyword}%`,
-          data: itemSlice
-        });
-      } else {
-        return responseObject(200, "No matching results found!", filteredItems);
-      }
-    } catch (err) {
-      throw new HttpException(err.response, err.status);
-    }
-  }
-
   // Upload image for location
   async uploadImage(token, locationId, file) {
     try {
@@ -265,6 +227,11 @@ export class LocationService {
     } catch (err) {
       throw new HttpException(err.response, err.status);
     }
+  }
+
+  // Get location by search pagination
+  async getLocationsByPagination() {
+    console.log("Hello"); 
   }
 
 }
