@@ -39,6 +39,12 @@ export class LocationController {
     return this.locationService.getLocationByLocationId(Number(locationId))
   }
 
+  // Get location by search pagination
+  @Get('search-pagination')
+  searchLocationByPagination() {
+    return this.locationService.searchLocationByPagination();
+  }
+
   // Update location by location_id
   @ApiHeader({
     name: "token",
@@ -91,9 +97,4 @@ export class LocationController {
     return this.locationService.deleteLocation(token, +locationId);
   }
 
-  // Get location by search pagination
-  @Get("pagination")
-  getLocationsByPagination() {
-    return this.locationService.getLocationsByPagination(); 
-  }
 }

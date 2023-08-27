@@ -80,6 +80,11 @@ export class LocationService {
     }
   }
 
+  // Get location by search pagination
+  async searchLocationByPagination() {
+    console.log("hello");
+  }
+
   // Update location by location_id
   async updateLocation(token, locationId, updateLocation) {
     try {
@@ -228,10 +233,5 @@ export class LocationService {
       throw new HttpException(err.response, err.status);
     }
   }
-
-  // Get location by search pagination
-  async getLocationsByPagination() {
-    console.log("Hello"); 
-  }
-
+  
 }
