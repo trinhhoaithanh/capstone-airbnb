@@ -38,12 +38,7 @@ export class LocationController {
   getLocationByLocationId(@Param('id') locationId) {
     return this.locationService.getLocationByLocationId(Number(locationId))
   }
-
-  // Get location by search pagination
-  @Get('search-pagination')
-  searchLocationByPagination() {
-    return this.locationService.searchLocationByPagination();
-  }
+  
 
   // Update location by location_id
   @ApiHeader({

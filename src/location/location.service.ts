@@ -9,7 +9,9 @@ import { getUserInfoFromToken } from 'src/util/decoded-token';
 @Injectable()
 export class LocationService {
   prisma = new PrismaClient();
-  constructor(private jwtService: JwtService) { }
+  constructor(
+    private jwtService: JwtService
+  ) { }
 
   // Get locations
   async getLocations() {
@@ -78,11 +80,6 @@ export class LocationService {
     catch (err) {
       throw new HttpException(err.response, err.status);
     }
-  }
-
-  // Get location by search pagination
-  async searchLocationByPagination() {
-    console.log("hello");
   }
 
   // Update location by location_id
