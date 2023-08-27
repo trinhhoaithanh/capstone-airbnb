@@ -91,4 +91,14 @@ export class LocationController {
     return this.locationService.deleteLocation(token, +locationId);
   }
 
+  // Get location by search pagination
+  @Get('pagination/:pageIndex:pageSize:keyword')
+  searchLocationByPagination(
+    @Param('pageIndex') pageIndex: number,
+    @Param('pageSize') pageSize: number, 
+    @Param('keyword') keyword: string
+  ) {
+    return this.locationService.searchLocationByPagination(+pageIndex, +pageSize, keyword); 
+  }
+
 }
