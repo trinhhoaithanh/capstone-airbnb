@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { Roles } from 'src/enum/roles.enum';
 import { responseArray, responseObject } from 'src/util/response-template';
 import { getUserInfoFromToken } from 'src/util/decoded-token';
-import { get } from 'http';
 
 @Injectable()
 export class RoomsService {

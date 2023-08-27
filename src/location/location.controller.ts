@@ -39,7 +39,6 @@ export class LocationController {
     return this.locationService.getLocationByLocationId(Number(locationId))
   }
   
-
   // Update location by location_id
   @ApiHeader({
     name: "token",
