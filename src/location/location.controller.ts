@@ -92,7 +92,7 @@ export class LocationController {
   }
 
   // Get location by search pagination
-  @Get('pagination/:pageIndex:pageSize:keyword')
+  @Get('pagination/:pageIndex/:pageSize/:keyword')
   searchLocationByPagination(
     @Param('pageIndex') pageIndex: number,
     @Param('pageSize') pageSize: number, 
