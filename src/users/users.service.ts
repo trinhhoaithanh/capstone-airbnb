@@ -63,7 +63,7 @@ export class UsersService {
             full_name,
             birth_day,
             gender,
-            user_role,
+            user_role: Roles.USER,
             phone,
           };
 
